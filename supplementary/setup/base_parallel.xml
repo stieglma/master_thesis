@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE benchmark PUBLIC "+//IDN sosy-lab.org//DTD BenchExec benchmark 1.0//EN" "http://www.sosy-lab.org/benchexec/benchmark-1.0.dtd">
+<benchmark tool="cpachecker" timelimit="600 s" hardtimelimit="650 s" memlimit="8 GB" cpuCores="4">
+  <option name="-noout"/>
+  <option name="-heap">6000M</option>
+  <option name="-setprop">solver.solver=MATHSAT5</option>
+  <option name="-setprop">cpa.predicate.refinement.performInitialStaticRefinement=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantFields=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantVariables=false</option>
+  <propertyfile>${inputfile_path}/ALL.prp</propertyfile>
+
+  <tasks name="Other_false">
+    <includesfile>benchmarkOther_false.set</includesfile>
+  </tasks>
+    <tasks name="Other_true">
+    <includesfile>benchmarkOther_true.set</includesfile>
+  </tasks>
+  <tasks name="x64_false">
+    <includesfile>benchmark64_false.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+    <tasks name="x64_true">
+    <includesfile>benchmark64_true.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+  <tasks name="Loops_false">
+    <includesfile>benchmarkLoops_false.set</includesfile>
+  </tasks>
+    <tasks name="Loops_true">
+    <includesfile>benchmarkLoops_true.set</includesfile>
+  </tasks>
+
+  <rundefinition name="pred-bitvectors">
+    <option name="-pred-Invgen-parallel-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=false</option>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=false</option>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=false</option>
+  </rundefinition>
+
+</benchmark>

@@ -1,0 +1,15 @@
+\section{Program Representation}
+A program is represented by a \emph{\ac{CFA}}~\cite{Beyer:CPA}. This automaton consists of a set $L$ of locations,
+which models the program counter ($pc$), including the initial location $l_0 \in L$ and a set of control-flow edges $G \subseteq L \times \Ops \times 
+L$.\,\sidenote{The set $G$ models the executed program operations for control-flow from one location to another.}
+$\Ops$ is the set of program operations.
+Let $X$ be the set of all program variables, the \emph{concrete state} $c$ of a program assigns a value to each variable from the set $X \cup \{pc\}$.
+Let $C$ be the set of all concrete states, and let every edge $g \in G$ define the transition relation $\xrightarrow{g} \subseteq C \times \{g\} 
+\times C$ for transforming a concrete state of a certain program location into a concrete state of another program location.
+The complete transition relation $\rightarrow = \bigcup_{g \in G} \xrightarrow{g}$ is created by unifying all edges.
+A subset $r \subseteq C$ of concrete states is called region. 
+Now we can define reachability on a \ac{CFA}.\\
+
+
+\begin{note}[Reachability] If there exists a sequence of concrete states $\left< c_0,c_1,...,c_n\right>$ and a region $r$ such that $c_0 \in r$ and $\forall i : 1 \leq i \leq n \implies c_{i-1} \rightarrow c_i$, we call the state $c_n$ reachable from the region $r$.
+\end{note}

@@ -1,0 +1,117 @@
+\subsection{Parallel Analyses}\label{title:evalParallel}
+\begin{figure}
+  \centering
+  %\tikzsetnextfilename{parallel_all.pdf}
+\begin{small}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+	  % Which column to be taken from each file
+	  /pgfplots/table/y index=3,
+	  /pgfplots/table/header=false,
+	  % axis labels
+	  xlabel=n-th fastest correct result,
+	  ylabel=CPU time (\second),
+	  % axis ranges
+	  xmin= 0,
+	  xmax=2150,
+	  ymin=2,
+	  ymax=650,
+	  xtick distance=500,
+	  width=\textwidth,
+	  height=.7\textwidth,
+	  mark repeat=500,
+	  cycle list name=exotic,
+	  % legend
+	  legend entries={base600, base300, basePar, async-abs},%, async-path, async-prec, async-prec-abs, async-abs-path, async-prec-path, async-prec-abs-path},
+	  every axis legend/.append style={at={(0,1)}, anchor=north west, outer xsep=5pt, outer ysep=5pt,},
+	  ]
+	  \addplot+[mark phase = 100] table {../resources/quantile_base_long.csv};
+	  \addplot+[mark phase = 200] table {../resources/quantile_base_short.csv};
+	  \addplot+[mark phase = 300] table {../resources/quantile_base_parallel.csv};
+	  \addplot+[mark phase = 400] table {../resources/quantile_parallel_abs.csv};
+	  %\addplot+[mark phase = 200] table {../resources/quantile_parallel_path.csv};
+	  %\addplot+[mark phase = 250] table {../resources/quantile_parallel_prec.csv};
+	  %\addplot+[mark phase = 300] table {../resources/quantile_parallel_prec_abs.csv};
+	  %\addplot+[mark phase = 350] table {../resources/quantile_parallel_abs_path.csv};
+	  %\addplot+[mark phase = 400] table {../resources/quantile_parallel_prec_path.csv};
+	  %\addplot+[mark phase = 450] table {../resources/quantile_parallel_prec_abs_path.csv};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \end{small}
+
+  \caption{A quantile plot showing the best concurrent analysis and the three baselines}
+  \label{fig:quantile_parallel}
+\end{figure}
+
+In this section we move away from trying to generate invariants but keeping the impact on the overall time of the analysis low, to using approximately half of the overall analysis time for
+invariant generation. By limiting the overall analysis time to \SI{600}{\second} and the CPU time to \SI{300}{\second} for both of the analysis threads we can achieve this.
+Tracking the CPU time a thread needs is, however, not very precise in our case. On the one hand, threads started from within a thread are not counted towards this time,
+and on the other hand, additionally running threads, for example for handling the resource limits or also the Java garbage collector can also not be counted towards these
+limits. So the thread-wise CPU time limits are a best-effort approach to achieve a certain distribution.
+
+As described in \autoref{title:configs} we only have parallel configurations combining an analysis using the \PredicateCPA{} and an analysis using the \InvariantsCPA{}.
+The \InvariantsCPA{} is configured to be continuously refined, and provides the intermediate finished reached sets to the \PredicateCPA{}, which computes invariants from them.
+As baselines, we use all three configurations \textbf{base300}, \textbf{base600} and \textbf{basePar} to be able to draw more precise conclusions out of the results. \autoref{fig:quantile_parallel} gives 
+an overview on the performance of all baselines and the best parallel analysis using invariants\,\sidenote{All other parallel configurations using invariants are quite similar to \textbf{async-abs} and 
+are excluded from \autoref{fig:quantile_parallel} for better visibility.}. All parallel-analysis configurations will be discussed in more detail in the following paragraphs. Exact numbers for all 
+configurations can be found in \autoref{table:parallel}.
+As can be seen in \autoref{fig:quantile_parallel}, \textbf{base300} has the same curve as \textbf{base600}, it just stops earlier. This is exactly what is expected as both configurations are equal,
+only \textbf{base600} has twice the amount of time. More interesting is that the number of successfully analyzed tasks increases by \num{78} from \textbf{base300} to \textbf{base600} but by instead
+using \textbf{basePar} we can further increase the number of successfully analyzed tasks by \num{28}.
+This means that there are many programs quite hard to analyze with the \textbf{base300} or even \textbf{base600} which are easier for the analysis using the \InvariantsCPA{}.
+By generating invariants
+and using them at any possible location we can once again increase the number of successfully analyzed tasks. While all configurations using invariants perform strictly better than the baseline,
+\textbf{async-abs} is the best configuration we evaluated in this setting, with an increase of \num{54} more correctly analyzed tasks, compared to \textbf{basePar}.
+
+
+
+
+\input{tableContents/parallel_results}
+
+\autoref{table:parallel} shows many interesting facts about this way of generating and using invariants. At first the overall CPU time of all analyses using parallel analyses is about \SI{87}{\percent} higher
+than \textbf{base300}. This is not surprising as we configured the parallel analyses to be able to use at most \SI{600}{\second}, and there are two analyses running concurrently. Compared to \textbf{base600} the
+overall CPU time is only increasing by approximately \SI{6}{\percent}. When only looking at the correctly and equally analyzed tasks, the parallel analyses consequently take about \SI{90}{\percent} more CPU time than
+\textbf{base300} and \textbf{base600}.
+By looking at the wall time the picture changes. Over all tasks the wall time of \textbf{base600} is \SI{240}{\hour} and the wall times of the parallel analyses are around \SI{150}{\hour}, about \SI{37}{\percent} lower. For the 
+correctly and equally analyzed tasks the wall time for \textbf{base300} and \textbf{base600} is shorter than any of the parallel analyses. It is noticeable that while the number of correctly 
+analyzed tasks is increasing for all parallel configurations, the number of wrongly analyzed tasks decreases by 9, about \SI{33}{\percent}. In the next paragraphs we will only use \textbf{basePar} for 
+comparisons, because this baseline is closest to the configurations using invariants.
+
+\textbf{basePar} is the slowest of all parallel configurations, meaning that the usage of invariants boosts the CPU and wall time of the analyses. The wall time is overall about \SI{3}{\percent} higher and for the 
+equal tasks about \SI{8}{\percent} higher. For the CPU time it is overall about \SI{2}{\percent} higher, and \SI{4}{\percent} higher for the equally and correctly analyzed tasks.
+While the consumed time decreases when using invariants, the number of 
+correctly analyzed tasks rises between \num{25} and \num{54}, making the performance of the analyses strictly better than \textbf{basePar}.
+
+%file:///localhome/stieglma/workspace/CPAcheckerTrunk/test/programs/benchmarks/heap-manipulation/sll_to_dll_rev_false-unreach-call.i
+By taking a closer look at the configurations using invariants we can see that the configurations where the invariants are conjoined to the path formula are analyzing one unsafe task wrongly and report 
+that there is no specification violation. By digging deeper we found out that at some point, the conjunction of path formula and invariant became unsatisfiable, immediately leading to the wrong result.
+When comparing the path formula and the invariant at this point, one can see that the invariant assumes that a variable (a pointer) has the address zero, where it has another address in the path formula.
+This is no encoding issue in the way we thought about it, instead it has to do with how (aliased) pointers are handled in different \acp{CPA}. While the \PredicateCPA{} handles such cases with
+uninterpreted functions and does not expect value assignments to such variables, there is no special handling in the \InvariantsCPA{} at all. The \InvariantsCPA{} uses a separate \ac{CPA} for that, and the formulas generated by the \InvariantsCPA{} do 
+unfortunately contain assumptions about pointers being 0.\,\sidenote[57][-1cm]{The full path formula, the invariant, and the interpolant for the program
+\texttt{heap-manipulation/sll\\\_to\_dll\_rev\_false-unr\\each-call.i} can be found on our supplementary web page.}
+This leads to the unwanted behavior we observed here. That this problem leads to a different results only one time in over \num{3400} verification tasks makes the problem 
+even harder to find. A reason for this issue not having bad effects on the \textbf{-abs} configurations is that the interfering parts of the path formula are removed during abstraction due to the 
+precision.
+\setcounter{sidenote}{58}
+
+%As for all invariant usage approaches besides conjoining them to the path formula the verification task is analyzed correctly we think that the problem lies in the usage strategy.
+
+Apart from the wrongly analyzed task there are more differences, for example regarding the number of tasks where the result comes from the main analysis using the \PredicateCPA{} and not from the additional 
+analysis using the \InvariantsCPA{}. From \num{2104} correctly analyzed tasks with \textbf{async-abs}, \num{1154} results are reported by the main analysis, about \SI{55}{\percent}. For all configurations where the invariants 
+are appended to the precision, this ratio is about \SI{53}{\percent}, meaning that the main analysis became slower such that more results are given by the analysis with the \InvariantsCPA{}. This can also be seen 
+by the wall and CPU times, which are higher for all \textbf{-prec} configurations.
+
+In \autoref{title:combiningInv} we made some assumptions about the performance of the different approaches, stating that \textbf{-abs}, \textbf{-path}, \textbf{-prec} and \mbox{\textbf{-prec-path}} look most 
+promising. While \textbf{-prec} suffers from bad performance due to more necessary computations during the abstraction, we need to be sure that we have invariants (with correct encoding) to be able
+to safely use them with \textbf{-abs}. From \autoref{table:parallel} we can see that \textbf{async-abs} is the best configuration we have used, which is an indicator that our formula conversion works 
+very well. Additionally we found out that the performance drawback of appending invariants to the precision is considerable. The configurations conjoining the invariants to the path formula are almost as 
+good as \textbf{async-abs}, however, they have one wrongly analyzed unsafe result, making the conclusion about their validity impossible. 
+
+
+
+
+
+
+
+

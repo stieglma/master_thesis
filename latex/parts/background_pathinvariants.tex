@@ -1,0 +1,19 @@
+\section{Path Invariants}\label{background:pathinvariants}
+A path invariant~\cite{Beyer:PathInvariants} is an invariant created for a path program --- the smallest syntactic subprogram containing an infeasible error path.
+A path program may contain loops and therefore often represents a group of infeasible error paths that would be found upon unrolling the loop. By computing
+invariants capable of refuting more than one infeasible error path, a weakness of \ac{CEGAR}, loops leading to a potentially infinite amount of necessary
+refinements,\,\sidenote{This happens, \eg, by choosing disadvantageous precision increments, such that loops have to be unrolled and the infeasible error is found
+again in each loop iteration.} can be overcome.
+
+By combining \ac{CEGAR} with invariant generation and using the generated invariants, for example, as precision increment instead of interpolants, we are able
+to reduce the number of necessary refinements, and therefore lower the analysis time. This approach was initially implemented in \CPAchecker{} as a
+term paper.\,\sidenote{See \url{stieglmaier.me/uploads/invariants.pdf} for more details.} Although the approach worked, there were some conceptual
+issues, which will be addressed in this masters thesis. The implementation of path invariants in \CPAchecker{} for the \PredicateCPA{} was done using
+\autoref{alg:continously-refined} without having multiple iterations, but stopping after the first one.\,\sidenote{Path invariants are computed when
+they are needed, so continuously-refining the precision of the analysis takes too much time as it is not running in parallel and has potentially no
+end. By using \autoref{alg:continously-refined} we can access the method for retrieving invariants which is the reason for using it.} The computed
+invariants are retrieved via $\mathtt{getCurrentlyKnownInvariants}$ and appended to the precision of the analysis instead of
+computing interpolants. Due to the restriction of the invariant generation to a certain path of the program, the generated invariants do not hold for
+the complete program, but only for the given path program, which prevents, for example, directly conjoining path invariants to the
+abstraction formula in a \PredicateCPA{}. Instead, we can only add them to the precision of the analysis.
+

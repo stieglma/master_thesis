@@ -1,0 +1,154 @@
+\section{Configurable Program Analysis}
+The two main approaches in automated software verification are model checking and program (data-flow) analysis~\cite{Beyer:CPA}. In contrast to software model checkers, suffering from 
+state-space explosion for large programs, data-flow analyses are usually path-insensitive.
+
+By combining both approaches, the individual drawbacks (false alarms through over-approximation, imprecision due to merging all states for equal locations) can be reduced. On the one hand, the state 
+space can be shrinked drastically by joining at least some states, and on the other hand, the accuracy of the analysis can be increased by not joining all states but only those with certain (common) 
+attributes (\eg, loop heads).
+
+The original definition of configurable program analysis~\cite{Beyer:CPA} specifies four components influencing the effectiveness and efficiency of the analysis, the components are called 
+\emph{abstract domain}, \emph{transfer relation}, \emph{merge operator} and \emph{stop operator}.
+This definition has been extended with an additional \emph{precision}\,\sidenote{A precision can, \eg, be utilized for telling the analysis which variables should be tracked, or that variables should only 
+be tracked up to a certain degree.} per abstract state and also provides a \emph{precision adjustment function}. The abbreviation for the \ac{CPA} is usually CPA+ yet we stick to calling it 
+\ac{CPA}~\cite{Beyer:DynamicPrecisionAdjustment} for simplicity\,\sidenote{We do only use CPA+ in this thesis, so this name change does not lead to conflicts.}. 
+More details on the parts of a \acs{CPA} can be found in the next section.
+
+\subsection{Formalism of a \acs{CPA}}
+A \ac{CPA}~\cite{Beyer:DynamicPrecisionAdjustment} $\DD = (D, \precision, \transabs, \mergeop, \stopop, \precop)$ consists of six pieces: an abstract domain $D$, a set $\precision$ of precisions, a transfer relation $\transabs$, a merge operator $\mergeop$, a termination check $\stopop$ and a precision adjustment function $\precop$. These components will be described in the following paragraphs:
+
+\begin{itemize}
+ \item The \emph{abstract domain} $D = (C, \calE, \sem{\cdot})$ consists of three subcomponents. The first two are a set $C$ of concrete states and a semi-lattice $\calE = (E, \top, \bot, \sqsubseteq, \sqcup)$ with
+ \begin{itemize}
+   \item a potentially infinite set $E$ of elements, called abstract states,
+   \item a top element $\top$ and a bottom element $\bot$ with $\top, \bot \in E$,
+   \item a preorder $\mathord{\sqsubseteq} \subseteq E \times E$,
+   \item and a total function $\sqcup : E \times E \rightarrow E$ (the join operator).
+ \end{itemize}
+  The third part of the abstract domain is a concretization function $\sem{\cdot} : E \rightarrow 2^C$ which returns the set of concrete states represented by an abstract state.
+
+ For soundness, the abstract domain has to follow two requirements:
+  \begin{enumerate}
+   \item $\sem{\top} = C$ and $\sem{\bot} = \emptyset$
+   \item $\forall e, e' \in E: \sem{e \sqcup e'} \supseteq \sem{e} \cup \sem{e'}$\newline (either the join operator is precise or it over-approximates)
+  \end{enumerate}
+
+ \item The set $\precision$ defines the possible precisions of the abstract domain~$D$.
+ Elements of $\precision$ are used by the analysis to keep track of different precisions for different abstract states.
+ 
+ Let $e$ be an abstract state and $\pi$ a precision. We call a pair $(e, \pi)$ \emph{the abstract state $e$ with precision $\pi$}.
+ %Moreover all operators on the abstract domain are parametric in the precision.
+
+ \item The \emph{transfer relation} $\transabs \subseteq E \times G \times E \times \precision$ assigns to every abstract state $e \in E$ with precision $\pi$ all possible new abstract states $e'$ with precision $\pi$  for a \ac{CFA} edge $g \in G$. If $(e,g,e', \pi) \in \transabs$ then we write $e \overset{g}{\transabs} (e', \pi)$ and furthermore we write $e \transabs (e', \pi)$ if an edge $g$ exists with $e \overset{g}{\transabs} (e', \pi)$.
+ 
+  The transfer relation is required to over-approximate all operations for every fixed precision in order to be sound: 
+  \begin{displaymath}
+  \forall e \in E, g \in G, \pi \in \precision: \bigcup_{e \transabs (e', \pi)} \sem{e'} \supseteq \bigcup_{c \in \sem{e}} \left\{c' | c \xrightarrow{g} c'\right\}
+  \end{displaymath}
+
+ \item The \emph{merge operator} $\mergeop : E \times E \times \precision \rightarrow E$ merges the information of two abstract states. Soundness is achieved by the following requirement:
+ \begin{displaymath}
+  \forall e, e' \in E, \pi \in \precision: e' \sqsubseteq \mergeop(e, e', \pi)
+ \end{displaymath}
+ Depending on the abstract state $e$ and the precision $\pi$ the result of the merge operation can be anything between $e'$ and $\top$ (the result may only be equal to or more abstract than the second parameter). Furthermore the $\mergeop$ operator is not commutative. While the $\mergeop$ operator is not equal to the join operator $\sqcup$ from the semi-lattice, it can be based on it.
+ The two most commonly used $\mergeop$ operators are $\mergeop^{sep}(e,e') = e'$ and $\mergeop^{join}(e,e') = e \sqcup e'$.
+
+ \item The \emph{termination check} $\stopop : E \times 2^E \times \precision \rightarrow \BB$ checks whether the set of abstract states $R \subseteq E$, given as second parameter, is covering the abstract state (given as first parameter) with precision (given as third parameter). To ensure soundness, the termination check has to guarantee that if an abstract state $e$ is covered by the set of abstract states $R$, every concrete state represented by $e$ corresponds to an abstract state from $R$:
+ \begin{gather*}
+   \forall e \in E, R \subseteq E, \pi \in \precision:\\
+   \stopop(e, R, \pi) = \text{\true{}} \Rightarrow \sem{e} \subseteq \bigcup_{e' \in R} \sem{e'}
+ \end{gather*}
+Equivalently to the merge operator, the termination check is not the same as the preorder $\sqsubseteq$ of the semi-lattice, but can be based on it. An intuitive implementation of the $\stopop$ operator is   \begin{displaymath}\stopop^{sep}(e, R) = (\exists e' \in R: e \sqsubseteq e')  \end{displaymath} (If one abstract state in $R$ is equal to or more abstract than $e$ ($\sqsubseteq$), we say that $e$ is covered by~$R$).
+
+
+ \item The \emph{precision adjustment function} $\precop : E \times \precision \times 2^{E\times \precision} \rightarrow E \times \precision$ creates, for a given abstract state $e$ with precision $\pi$ and a given set of abstract states with precisions, a new abstract state $\hat{e}$ with precision $\hat{\pi}$. 
+ During the precision change, the $\precop$ function may also perform a widening of the abstract state, thus it is able to decrease or increase the precision of abstract states.
+ 
+ The soundness requirement for precision adjustment is that the set of concrete states represented by $e$ is a subset of the set of concrete states represented by $\hat{e}$.
+ \begin{gather*}
+   \forall e, \hat{e} \in E, \pi, \hat{\pi} \in \precision, R \subseteq E \times \precision:\\
+   (\hat{e}, \hat{\pi}) = \precop(e, \pi, R) \Rightarrow \sem{e} \subseteq \sem{\hat{e}}.
+ \end{gather*}
+\end{itemize}
+
+\subsection{The Reachability Algorithm}
+In the last section, all necessary components of a \ac{CPA} were introduced. These components are used
+by the reachability algorithm~\cite{Beyer:DynamicPrecisionAdjustment}, which computes, for example, an over-approximation of the set of reachable concrete states for a given initial abstract state with 
+precision and a given \ac{CPA}. From now on, we will call the reachability algorithm for a \ac{CPA} $\CPAAlgorithm{}$.
+
+While running the $\CPAAlgorithm{}$, two sets get updated permanently, the set $\reached$ where all found reachable states are stored,
+and the set $\waitlist$ where all abstract states, which have already been found but were not yet processed (frontier), are stored.
+
+The $\CPAAlgorithm{}$ computes a set of reachable abstract states with accompanying precision from an initial abstract state with precision.
+After computing the (intermediate) abstract successors with the transfer relation, these successors are given to the precision adjustment function. The outcome of the precision adjustment function is then merged with every abstract state with precision from the set $\reached$ using the given $\mergeop$ operator. If the resulting states are more abstract than those states from the set $\reached$ they were merged with, the states from $\reached$ are replaced with the new states.
+If the state with precision resulting from the merge step is not covered by any state in the set $\reached$, it is added to both, the set $\reached$ and the set $\waitlist$.
+
+To adapt the $\CPAAlgorithm{}$ for usage with \acs{CEGAR} we have to change the input parameters from \emph{one} initial abstract state with precision to a set $R_0$ of abstract states with precision. Additionally, a subset $W_0 \subseteq R_0$ of frontier abstract states with precision is given as parameter~\cite{Beyer:ExplicitCEGAR}. \autoref{alg:cpa} is the resulting reachability algorithm. The function $\mathtt{isTargetState}$ checks if a state is a target state\,\sidenote{A target state is a state where the specification does not hold. The specification can be implicitly given through the implementation of the \ac{CPA}.}.
+
+\begin{algorithm}
+\LinesNumbered
+ \SetKw{Var}{Variables}
+ \SetKwInput{Kw}{Variables}
+ \KwIn{a configurable program analysis with dynamic precision adjustment $\mathbb{D} = (D, \precision, \transabs, \mergeop, \stopop, \precop)$,\newline
+       a set $R_0 \subseteq (E \times \precision)$ of abstract states with precision, and\newline
+       a subset $W_0 \subseteq R_0$ of frontier abstract states with precision, where $E$ denotes the set of elements of the semi-lattice of $D$}
+ \KwOut{the set $\reached$ and the set $\waitlist$}
+ \Kw{a set $\reached$ of elements of $E \times \precision$,\newline a set $\waitlist$ of elements of $E \times \precision$}
+   $\waitlist := W_0$\;
+   $\reached := R_0$\;
+ \While{$\waitlist \neq \emptyset$}{
+  choose $(e, \pi)$ from $\waitlist$\;
+  $\waitlist$ :=  $\waitlist \backslash \{(e, \pi)\}$\;
+  \For{each $e'$ with $e \transabs (e', \pi)$}{
+    \emph{precision adjustment}
+    $(\hat{e}, \hat{\pi}) := \precop(e', \pi, \reached)$\;
+    \If{$\mathtt{isTargetState}(\hat{e})$}{
+      \Return{$(\reached \cup \{(\hat{e}, \hat{\pi})\}, \waitlist \cup \{(\hat{e}, \hat{\pi})\})$}
+    }
+    \For{each $(e'', \pi'') \in \reached$}{
+      \emph{combine with existing abstract state}\;
+      $e_{new} := \mergeop(\hat{e}, e'', \hat{\pi})$\;
+      \If{$e_{new} \neq e''$} {
+       $\waitlist := (\waitlist \cup \{(e_{new}, \hat{\pi})\}) \backslash \{(e'', \pi'')\}$\;
+       $\reached := (\reached \cup \{(e_{new}, \hat{\pi})\}) \backslash \{(e'', \pi'')\} $\;
+      }
+    }
+    \If{$\lnot \stopop(\hat{e}, \{e | (e, \cdot) \in \reached\}, \hat{\pi})$}{
+    \emph{add new abstract state}\;
+      $\waitlist := \waitlist \cup \{(\hat{e}, \hat{\pi})\}$\;
+      $\reached := \reached \cup \{(\hat{e}, \hat{\pi})\}$\;
+    }
+  }
+ }
+ \Return{$(\reached, \emptyset)$}
+
+ \caption{$\CPAAlgorithm{}$~\cite{Beyer:DynamicPrecisionAdjustment, Beyer:ExplicitCEGAR}}
+ \label{alg:cpa}
+\end{algorithm}
+
+\clearpage
+\subsection{Composite Program Analysis}\label{title:compositeCPA}
+With the concept of a \ac{CPA} we can now define analyses for tracking explicit values of variables throughout the control-flow, or we can track the values of variables as intervals or even boolean 
+formulas. All of these analyses need to take care of the different locations of the \ac{CFA} and most probably also of the call-stack. For separation of concerns we do now introduce the possibility
+to combine several \acp{CPA} into one composite \ac{CPA}:
+\begin{displaymath}
+  \mathcal{C} = (\DD_1, ..., \DD_n, \precision_\times, \transabs_\times, \mergeop_\times, \stopop_\times, \precop_\times) \text{ with } n \in \NN
+\end{displaymath}
+This way, we can split up the responsibilities of single \acp{CPA} and make their purpose clearer\,\sidenote{We can, \eg, make one \ac{CPA} which is solely responsible for tracking the location, and one for tracking the call stack.}~\cite{Beyer:DynamicPrecisionAdjustment}. Such a composite \ac{CPA} consists of a finite amount of \acp{CPA} and: 
+\begin{itemize}
+ \item a composite set of precisions $\precision_\times$,
+ \item a composite transfer relation $\transabs_\times$,
+ \item the composite $\mergeop$ operator $\mergeop_\times$,
+ \item the composite $\stopop$ operator $\stopop_\times$, and
+ \item the composite $\precop$ operator $\precop_\times$.
+\end{itemize}
+ Let $i~\in~[1;n]$, the five composites above are expressions over the components of the involved \acp{CPA} $(\precision_i, \transabs_i, \mergeop_i, \stopop_i, \precop_i, \sem{\cdot}_i, E_i,\\ \top_i, \bot_i, \sqsubseteq_i, \sqcup_i)$. There are also two new operators:
+ \begin{gather*}
+  \text{strengthen: } \downarrow : \times^n_{i=1} E_i \rightarrow E_1\\
+  \text{comparison: } \preceq \subseteq \times^n_{i=1} E_i
+ \end{gather*}
+ Strengthening is an additional operator for a \ac{CPA} which can be used as part of a composite. Its purpose is to compute a stronger element from the lattice set $E_1$ by using the information from an element of the lattice sets $E_2 ... E_n$; $\downarrow (e_1, ..., e_n) \sqsubseteq e_1$ has to be fulfilled. The comparison operator allows us to compare elements of different lattices.
+
+For a composite analysis $\mathcal{C} = (\DD_1, ..., \DD_n, \precision_\times, \transabs_\times, \mergeop_\times, \stopop_\times)$ the CPA $\DD_\times = (D_\times, \precision_\times, \transabs_\times, \mergeop_\times, \stopop_\times)$ can be constructed. The product precision is defined by $\precision_\times = \precision_1 \times ... \times \precision_n$ and the components of the product domain $D_\times = D_1 \times ... \times D_n = (C, \calE_\times, \sem{\cdot}_\times)$ are defined by the product lattice
+$\calE_\times = \calE_1 \times ... \times \calE_n = (E_1 \times ... \times E_n, (\top_1, ..., \top_n), (\bot_1, ..., \bot_n), \sqsubseteq_\times, \sqcup_\times)$ with $(e_1, ..., e_n) \sqsubseteq_\times (e_1', ..., e_n')$ iff $\forall i \in n:  e_i \sqsubseteq_i e_i'$ and$ (e_1, ..., e_2) \sqcup_\times (e_1', ..., e_n') = (e_1 \sqcup_1 e_1', ..., e_n \sqcup_n e_n')$
+ and the product concretization function $\sem{\cdot}_\times$ in such a way, that
+  $\sem{(d_1, ..., d_n)}_\times = \sem{d_1}_1 \cap ... \cap \sem{d_n}_n$ is met.

@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<!DOCTYPE benchmark PUBLIC "+//IDN sosy-lab.org//DTD BenchExec benchmark 1.0//EN" "http://www.sosy-lab.org/benchexec/benchmark-1.0.dtd">
+<benchmark tool="cpachecker" timelimit="300 s" hardtimelimit="350 s" memlimit="8 GB" cpuCores="4">
+  <option name="-noout"/>
+  <option name="-heap">6000M</option>
+  <option name="-setprop">solver.solver=MATHSAT5</option>
+  <option name="-setprop">cpa.predicate.encodeBitvectorAs=BITVECTOR</option>
+  <option name="-setprop">cpa.predicate.encodeFloatAs=FLOAT</option>
+  <option name="-setprop">cpa.predicate.refinement.performInitialStaticRefinement=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantFields=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantVariables=false</option>
+
+  <propertyfile>${inputfile_path}/ALL.prp</propertyfile>
+
+  <tasks name="Other_false">
+    <includesfile>benchmarkOther_false.set</includesfile>
+  </tasks>
+    <tasks name="Other_true">
+    <includesfile>benchmarkOther_true.set</includesfile>
+  </tasks>
+  <tasks name="x64_false">
+    <includesfile>benchmark64_false.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+    <tasks name="x64_true">
+    <includesfile>benchmark64_true.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+  <tasks name="Loops_false">
+    <includesfile>benchmarkLoops_false.set</includesfile>
+  </tasks>
+    <tasks name="Loops_true">
+    <includesfile>benchmarkLoops_true.set</includesfile>
+  </tasks>
+
+  <!-- trying to create invariants with lightweight heuristics -->
+  <rundefinition name="RF_interpol-prec">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+    <option name="-setprop">cpa.predicate.blk.alwaysAtJoin=true</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+    <option name="-setprop">invariantChecker.kInductionConfig=config/bmc-invgen-bitprecise.properties</option>
+  </rundefinition>
+  <rundefinition name="RF_interpol-pf">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=true</option>
+    <option name="-setprop">cpa.predicate.blk.alwaysAtJoin=true</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+    <option name="-setprop">invariantChecker.kInductionConfig=config/bmc-invgen-bitprecise.properties</option>
+  </rundefinition>
+  <rundefinition name="RF_interpol-prec-pf">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=true</option>
+    <option name="-setprop">cpa.predicate.blk.alwaysAtJoin=true</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+    <option name="-setprop">invariantChecker.kInductionConfig=config/bmc-invgen-bitprecise.properties</option>
+  </rundefinition>
+  <rundefinition name="RF_interpol-abs">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=true</option>
+    <option name="-setprop">cpa.predicate.blk.alwaysAtJoin=true</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+    <option name="-setprop">invariantChecker.kInductionConfig=config/bmc-invgen-bitprecise.properties</option>
+  </rundefinition>
+  <rundefinition name="RF_interpol-abs-prec">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=true</option>
+    <option name="-setprop">cpa.predicate.blk.alwaysAtJoin=true</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+    <option name="-setprop">invariantChecker.kInductionConfig=config/bmc-invgen-bitprecise.properties</option>
+  </rundefinition>
+  <rundefinition name="RF_interpol-abs-prec-pf">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=true</option>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=true</option>
+    <option name="-setprop">cpa.predicate.blk.alwaysAtJoin=true</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+    <option name="-setprop">invariantChecker.kInductionConfig=config/bmc-invgen-bitprecise.properties</option>
+  </rundefinition>
+  <rundefinition name="RF_interpol-abs-pf">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=true</option>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=true</option>
+    <option name="-setprop">cpa.predicate.blk.alwaysAtJoin=true</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+    <option name="-setprop">invariantChecker.kInductionConfig=config/bmc-invgen-bitprecise.properties</option>
+  </rundefinition>
+
+  <rundefinition name="pred-alwaysAtJoin">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.blk.alwaysAtJoin=true</option>
+  </rundefinition>
+
+</benchmark>

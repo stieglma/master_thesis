@@ -1,0 +1,386 @@
+%%%%%%%%%%%%%% LANGUAGE
+
+% support english and german language
+\usepackage[english,ngerman]{babel}
+
+% set input encoding to utf8
+\usepackage[utf8]{inputenc}
+\usepackage{pifont}
+\usepackage{newunicodechar}
+\newunicodechar{✓}{\ding{51}}
+\newunicodechar{✗}{\ding{55}}
+\sloppy
+
+%%%%%%%%%%%%%% MISC
+
+% sample text
+\usepackage{lipsum}
+
+% more flexible enumerate environments
+\usepackage{enumerate}
+
+% commands for changing line-height
+\usepackage{setspace}
+
+% nicer quotes with \enquote
+\usepackage{csquotes}
+
+% captions for all kinds of figures/tables
+\usepackage{caption}
+\captionsetup{font=small, format=hang}
+
+% use our own bib style
+\bibliographystyle{my-alpha}
+
+% fix warning with missing font shapes
+\usepackage{textcomp}
+
+% fix warnings when using KOMA with listings package  
+\usepackage{scrhack}
+
+% to get the spacing after macros right         
+\usepackage{xspace}
+
+ % get marginpar right   
+\usepackage{mparhack}
+
+% fixes some LaTeX stuff --> since 2015 in the LaTeX kernel (see below)
+%\usepackage[latest]{latexrelease} % will be used once available in more distributions (ISSUE #107)
+\usepackage{fixltx2e} 
+
+% sidenotes instead of footnotes, plust additional hack for having the notes always on the correct side
+\usepackage{sidenotes}
+\renewcommand*{\marginfont}{\footnotesize\em}
+\usepackage{mparhack}
+
+
+%%%%%%%%%%%%%% FONT
+
+% better font-encoding and hyphenation for german text
+\usepackage[T1]{fontenc}
+
+% Palatino is a nice font
+\usepackage{palatino}
+
+% mathpazo provides good math support if you use Palatino
+\usepackage{mathpazo}
+
+% nicer displaying 
+\usepackage{microtype}
+
+%support for abbreviations
+\usepackage[printonlyused,smaller]{acronym}
+\renewcommand*{\aclabelfont}[1]{\acsfont{#1}}
+\usepackage{etoolbox}
+\makeatletter
+\newif\if@in@acrolist
+\AtBeginEnvironment{acronym}{\@in@acrolisttrue}
+\newrobustcmd{\LU}[2]{\if@in@acrolist#1\else#2\fi}
+
+\newcommand{\ACF}[1]{{\@in@acrolisttrue\acf{#1}}}
+\newcommand{\ACL}[1]{{\@in@acrolisttrue\acl{#1}}}
+\newcommand{\AC}[1]{{\@in@acrolisttrue\ac{#1}}}
+\makeatother
+
+%%%%%%%%%%%%%% PAGE LAYOUT
+
+% For the definition of custom page layouts and margins
+% (use only if you have strict requirements)
+% Disable \KOMAoptions{DIV=default} below!
+\usepackage{geometry}
+
+% more space between lines
+\onehalfspacing
+
+% re-compute page layout for the current font and spacing
+% disable if you use the geometry package
+\KOMAoptions{DIV=default}
+
+
+%%%%%%%%%%%%%% MATH
+
+% The basic math packages from AMS
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% some further symbols (\eg \lbracket)
+% for more see the "Comprehensive LaTeX symbol list" (symbols-a4.pdf)
+\usepackage{stmaryrd}
+
+% |x| (abs function)
+\newcommand{\abs}[1]{\left| #1 \right|}
+
+% shortcuts for the set of natural numbers, complex numbers etc.
+% \NN* are the natural numbers without 0
+\makeatletter
+\newcommand{\NN}{\@ifstar{{\mathbb{N}\setminus\{0\}}}{{\mathbb{N}}}}
+\makeatother
+\newcommand{\BB}{\mathbb{B}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\DD}{\mathbb{D}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RR}{\mathbb{R}}
+\DeclareMathOperator{\mergeop}{\mathsf{merge}}
+\DeclareMathOperator{\reached}{\mathsf{reached}}
+\DeclareMathOperator{\waitlist}{\mathsf{waitlist}}
+\DeclareMathOperator{\mergejoin}{\mergeop^{join}}
+\DeclareMathOperator{\mergesep}{\mergeop^{sep}}
+\DeclareMathOperator{\stopop}{\mathsf{stop}}
+\DeclareMathOperator{\stopsep}{\stopop^{sep}}
+\DeclareMathOperator{\transabs}{\leadsto}
+\DeclareMathOperator{\absop}{\mathsf{abs}}
+\DeclareMathOperator{\abssbe}{\absop^{\mathsf{SBE}}}
+\DeclareMathOperator{\abslbe}{\absop^{\mathsf{LBE}}}
+\DeclareMathOperator{\sizeop}{\mathsf{size}}
+\DeclareMathOperator{\SP}{\mathsf{SP}}
+\DeclareMathOperator{\precop}{\mathsf{prec}}
+\newcommand{\sem}[1]{\left\llbracket #1 \right\rrbracket}
+\newcommand{\calE}{\mathcal{E}}
+\newcommand{\preds}{\mathcal{P}}
+\newcommand{\Ops}{Ops}
+\newcommand{\op}{{op}}
+\newcommand{\formulas}{\mathcal{F}}
+\newcommand{\concrStates}{\mathcal{C}}
+\newcommand{\semilat}{\mathcal{V}}
+\newcommand{\cartAbs}{\phi_\mathbb{C}^\pi}
+\newcommand{\boolAbs}{\phi_\mathbb{B}^\pi}
+\newcommand{\precision}{\Pi}
+\newcommand{\blk}{\mathtt{blk}}
+\newcommand{\true}{\textsmaller{\textsc{true}}}
+\newcommand{\false}{\textsmaller{\textsc{false}}}
+
+\newcommand{\CPAchecker}{\textsmaller{\textsc{CPAchecker}}}
+\newcommand{\PredicateCPA}{Predicate CPA}
+\newcommand{\InvariantsCPA}{Invariants CPA}
+\newcommand{\PolicyCPA}{Policy CPA}
+\newcommand{\CPAAlgorithm}{\mathtt{CPAAlgorithm}}
+\newcommand{\CEGARAlgorithm}{\mathtt{CEGAR}}
+\newcommand{\ParallelAlgorithm}{\mathtt{ParallelAlgorithm}}
+\newcommand{\Kinduction}{$k$-induction}
+\newcommand{\AggregatedReachedSets}{\texttt{AggregatedReachedSets}}
+
+\newcommand{\InvGen}{\textsc{InvGen}}
+\newcommand{\Daikon}{\textsc{Daikon}}
+\newcommand{\PKIND}{\textsc{PKIND}}
+\newcommand{\SeaHorn}{\textsc{SeaHorn}}
+\newcommand{\Dafny}{\textsc{Dafny}}
+\newcommand{\MathSAT}{\textsc{MathSAT}}
+\newcommand{\ZT}{\textsc{Z3}}
+\newcommand{\TWOLS}{\textsc{2LS}}
+\newcommand{\BLAST}{\textsc{Blast}}
+
+
+% nicer phi
+\renewcommand\phi\varphi
+
+
+%%%%%%%%%%%%%% GRAPHICS
+
+\usepackage{wrapfig}
+
+% basic package for including external graphics
+\usepackage{graphicx}
+
+% resize verbatim tables
+\usepackage{adjustbox}
+
+% only use PDF files if no extension is specified,
+% we strongly prefer vector images
+\DeclareGraphicsExtensions{.pdf}
+
+% color support
+\usepackage[dvipsnames]{xcolor}
+
+% for pictures in TeX
+\usepackage[
+    group-digits=integer, group-minimum-digits=4, % group digits by thousands
+    free-standing-units, unit-optional-argument, % easier input of numbers with units
+    binary-units=true,%binary units
+    range-units=single,%range
+    ]{siunitx}
+\sisetup{range-phrase = -- }
+\usepackage{pgfplots}
+\pgfplotsset{
+    compat=1.9,
+    log ticks with fixed point, % no scientific notation in plots
+    table/col sep=tab, % only tabs are column separators
+    unbounded coords=jump, % better have skips in a plot than appear to be interpolating
+    filter discard warning=false, % Don't complain about empty cells
+    }
+\usepgfplotslibrary{colorbrewer}
+\SendSettingsToPgf % use siunitx formatting settings in PGF, too
+%\usetikzlibrary{external} 
+%\tikzexternalize[prefix=tikz/]
+
+%%%%%%%%%%%%%% TABLES
+
+\usepackage{tabularx} % better tables
+    \setlength{\extrarowheight}{3pt} % increase table row height
+\newcommand{\tableheadline}[1]{\multicolumn{1}{c}{\spacedlowsmallcaps{#1}}}
+\newcommand{\myfloatalign}{\centering} % to be used with each float for alignment
+
+
+% for table rows with alignment of numbers at the decimal separator
+
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+
+\usepackage{multicol}
+\usepackage{multirow}
+
+
+%%%%%%%%%%%%%% CODE & ALGORITHMS
+
+% float environment for algorithms
+\usepackage[boxed, vlined]{algorithm2e}
+\setlength{\algomargin}{0.5em}
+\SetNlSty{textbf}{}{~~}
+\DontPrintSemicolon
+
+% this would add Algorithm #number in the toc
+%\makeatletter
+%\renewcommand*{\l@algocf}[2]{\@dottedtocline{1}{1em}{2.3em}{Algorithm #1}{#2}}
+%\makeatother
+
+
+
+
+% for code with syntax highlighting
+\usepackage{listings}
+% a basic formatting style for C programs
+\definecolor{javared}{rgb}{0.6,0,0} % for strings
+\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
+\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
+\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
+\lstdefinestyle{JAVA}{
+    basicstyle=\ttfamily,
+    keywordstyle=\color{javapurple}\bfseries,
+    stringstyle=\color{javared},
+    commentstyle=\color{javagreen},
+    morecomment=[s][\color{javadocblue}]{/**}{*/},
+    numberblanklines=false,
+    flexiblecolumns=true,
+    lineskip=1pt,
+    numbers=left,
+    numberstyle=\tiny,
+    numberfirstline=true,
+    firstnumber=1,
+}
+
+\lstdefinestyle{C}{
+    basicstyle=\ttfamily,
+    keywordstyle=\color{javapurple}\bfseries,
+    stringstyle=\color{javared},
+    commentstyle=\color{javagreen},
+    morecomment=[s][\color{javadocblue}]{/**}{*/},
+    numberblanklines=false,
+    flexiblecolumns=true,
+    lineskip=1pt,
+    numbers=left,
+    numberstyle=\tiny,
+    numberfirstline=true,
+    firstnumber=1,
+}
+
+% use our new style by default
+\lstset{style=C}
+
+
+
+%%%%%%%%%%%%%%%%%%%% hyperreferences
+
+\usepackage{hyperref}
+\hypersetup{%
+    colorlinks=true, linktocpage=true, pdfstartpage=3, pdfstartview=FitV,%
+    % uncomment the following line if you want to have black links (\eg, for printing)
+    %colorlinks=false, linktocpage=false, pdfstartpage=3, pdfstartview=FitV, pdfborder={0 0 0},%
+    breaklinks=true, pdfpagemode=UseNone, pageanchor=true, pdfpagemode=UseOutlines,%
+    plainpages=false, bookmarksnumbered, bookmarksopen=true, bookmarksopenlevel=1,%
+    hypertexnames=true, pdfhighlight=/O,%nesting=true,%frenchlinks,%
+    urlcolor=webbrown, linkcolor=RoyalBlue, citecolor=webgreen, %pagecolor=RoyalBlue,%
+    %urlcolor=Black, linkcolor=Black, citecolor=Black, %pagecolor=Black,%
+    pdftitle={\myTitle},%
+    pdfauthor={\textcopyright\ \myName, \myUni, \myFaculty},%
+    pdfsubject={Masters Thesis in Computer Science},%
+    pdfkeywords={},%
+    pdfcreator={pdfLaTeX},%
+    pdfproducer={LaTeX with hyperref and classicthesis}%
+} 
+
+%%%%%%%%%%%%%%% auto references
+\makeatletter
+\@ifpackageloaded{babel}%
+    {%
+       \addto\extrasamerican{%
+			\renewcommand*{\figureautorefname}{Figure}%
+			\renewcommand*{\tableautorefname}{Table}%
+			\renewcommand*{\partautorefname}{Part}%
+			\renewcommand*{\chapterautorefname}{Chapter}%
+			\renewcommand*{\sectionautorefname}{Section}%
+			\renewcommand*{\subsectionautorefname}{Section}%
+			\renewcommand*{\subsubsectionautorefname}{Section}%
+			\renewcommand*{\paragraphautorefname}{Paragraph}
+			\renewcommand*{\algorithmautorefname}{Algorithm}%
+                }%
+       \addto\extrasenglish{%
+			\renewcommand*{\figureautorefname}{Figure}%
+			\renewcommand*{\tableautorefname}{Table}%
+			\renewcommand*{\partautorefname}{Part}%
+			\renewcommand*{\chapterautorefname}{Chapter}%
+			\renewcommand*{\sectionautorefname}{Section}%
+			\renewcommand*{\subsectionautorefname}{Section}%
+			\renewcommand*{\subsubsectionautorefname}{Section}%
+			\renewcommand*{\paragraphautorefname}{Paragraph}
+                        \renewcommand*{\algorithmautorefname}{Algorithm}%
+                }%
+       \addto\captionsenglish{\renewcommand{\contentsname}{Table of Contents}}
+       \addto\captionsenglish{\renewcommand{\lstlistlistingname}{List of Listings}}
+       \addto\extrasngerman{% 
+			\renewcommand*{\paragraphautorefname}{Absatz}%
+			\renewcommand*{\subparagraphautorefname}{Unterabsatz}%
+			\renewcommand*{\footnoteautorefname}{Fu\"snote}%
+			\renewcommand*{\FancyVerbLineautorefname}{Zeile}%
+			\renewcommand*{\theoremautorefname}{Theorem}%
+			\renewcommand*{\appendixautorefname}{Anhang}%
+			\renewcommand*{\equationautorefname}{Gleichung}%        
+			\renewcommand*{\itemautorefname}{Punkt}%
+                        \renewcommand*{\algorithmautorefname}{Algorithmus}%
+                }%  
+            % Fix to getting autorefs for subfigures right (thanks to Belinda Vogt for changing the definition)
+            \providecommand{\subfigureautorefname}{\figureautorefname}%             
+    }{\relax}
+\makeatother
+
+% add some configs for theorems
+\newtheoremstyle{note}% hnamei
+{3pt}% hSpace abovei
+{3pt}% hSpace belowi note
+{}% hBody fonti
+{}% hIndent amounti1
+%{\itshape}% hTheorem head fonti
+{}%
+{\newline}% hPunctuation after theorem headi
+{.5em}% hSpace after theorem headi2
+{\spacedlowsmallcaps{\thmname{#1}\thmnumber{ #2}\thmnote{: #3}}}%
+\theoremstyle{note}
+\newtheorem{note}{Definition}
+
+% algorithms
+
+
+
+% finally set up classic thesis
+
+\listfiles
+\usepackage[listings,dottedtoc,pdfspacing,parts,algorithm2e]{classicthesis}
+
+% some finetuning:
+\newcounter{dummy} % necessary for correct hyperlinks (to index, bib, etc.)
+\newlength{\abcd} % for ab..z string length calculation
+\providecommand{\mLyX}{L\kern-.1667em\lower.25em\hbox{Y}\kern-.125emX\@}
+\newcommand{\eg}{e.\,g.}
+\newcommand{\Eg}{E.\,g.}
+
+% wider sidenotes
+\setlength{\marginparwidth}{1.5\marginparwidth}

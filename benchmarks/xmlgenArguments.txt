@@ -1,0 +1,30 @@
+*****************************
+*     Restart-Tabellen:     *
+*****************************
+
+"predicate_base.2016-09-03_1927.results.pred-bitvectors." "predicate_base_longtimeout.2016-09-03_1353.results.pred-bitvectors." "predicate_bitprecise_restart_invariants.2016-09-05_1037.results." "restart_" "../CPAcheckerTrunk/test/results"
+
+
+
+*****************************
+*    Heuristic-Tabellen:    *
+*****************************
+
+"predicate_base.2016-09-03_1927.results.pred-bitvectors." "predicate_base_longtimeout.2016-09-03_1353.results.pred-bitvectors." "predicate_bitprecise_heuristics.2016-08-11_2242.results." "heuristic_" "../CPAcheckerTrunk/test/results"
+
+
+*****************************
+*    Parallel-Tabellen:     *
+*****************************
+
+"predicate_base.2016-09-03_1927.results.pred-bitvectors." "predicate_base_longtimeout.2016-09-03_1353.results.pred-bitvectors." "predicate_bitprecise_parallel_invariants.2016-08-12_1121.results." "parallel_" "../CPAcheckerTrunk/test/results" "predicate_base_parallel.2016-09-03_1701.results.pred-bitvectors."
+
+
+********************************
+*    AlwaysAtJoin-Tabellen:    *
+********************************
+
+"predicate_base.2016-09-03_1927.results.pred-bitvectors." "predicate_base_longtimeout.2016-09-03_1353.results.pred-bitvectors." "predicate_bitprecise_alwaysAtJoin.2016-08-11_1719.results." "heur_join_" "../CPAcheckerTrunk/test/results"
+
+
+

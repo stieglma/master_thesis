@@ -1,0 +1,35 @@
+\documentclass[10pt]{standalone}
+
+% basic package for including external graphics
+\usepackage{graphicx}
+
+% resize verbatim tables
+\usepackage{adjustbox}
+
+\usepackage{tabularx} % better tables
+    \setlength{\extrarowheight}{3pt} % increase table row height
+\newcommand{\tableheadline}[1]{\multicolumn{1}{c}{\spacedlowsmallcaps{#1}}}
+\newcommand{\myfloatalign}{\centering} % to be used with each float for alignment
+
+\usepackage{booktabs}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+
+
+\newcommand{\true}{\textsmaller{\textsc{true}}}
+\newcommand{\false}{\textsmaller{\textsc{false}}}
+
+\begin{document}
+ \begin{tabular}{lrll}
+  Strategy & \multicolumn{2}{c}{New Abstract State} & Possible Transitions\\
+  \midrule
+  No Inv& $(\textcolor{red}{i < 10}$,& $\text{\true{}})$ & $2 \rightarrow 3$, $2 \rightarrow 4$\\
+  Prec & $(\textcolor{red}{i = 2 \land i < 10}$,& $\text{\true{}})$ & $2 \rightarrow 3$\\
+  PF & $(\textcolor{red}{i < 10}$,& $\textcolor{brown}{i = 2})$ & $2 \rightarrow 3$\\
+  AF & $(\textcolor{red}{i < 10} \land \textcolor{blue}{i = 2}$,& $\text{\true{}})$ & $2 \rightarrow 3$\\
+  Prec + PF & $(\textcolor{red}{i = 2 \land i < 10}$,& $\textcolor{brown}{i = 2})$ & $2 \rightarrow 3$\\
+  Prec + AF & $(\textcolor{red}{i = 2 \land i < 10} \land \textcolor{blue}{i = 2}$,& $\text{\true{}})$ & $2 \rightarrow 3$\\
+  PF + AF & $(\textcolor{red}{i < 10} \land \textcolor{blue}{i = 2}$,& $\textcolor{brown}{i = 2})$ & $2 \rightarrow 3$\\
+  Prec + PF + AF & $(\textcolor{red}{i = 2 \land i < 10} \land \textcolor{blue}{i = 2}$,& $\textcolor{brown}{i = 2})$ & $2 \rightarrow 3$\\
+
+ \end{tabular}
+\end{document}

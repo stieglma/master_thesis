@@ -1,0 +1,200 @@
+\subsection{Lightweight Heuristics}
+With lightweight heuristics we mean all approaches that can be computed on the fly and which should --- compared to running more analyses in parallel or sequential combinations --- take only short amounts of time. The configurations we describe here are path invariants, inductive weakening of path formulas, checking the invariance of interpolants and checking the invariance of conjuncts of the path formula. All configurations have a limit of \SI{300}{\second} overall CPU time, there is no extra time for the invariant generation.
+
+\input{tableContents/heuristics_overall_results}
+
+In \autoref{table:lightweight_overall} the best configuration for each of the heuristics can be seen\,\sidenote{The values in the \emph{Invariants} column are extracted from
+logfiles, so they are only available for the verification tasks not running into timeouts or experiencing other errors. Additionally they are measured by \CPAchecker{} itself,
+so they are not as reliable as the CPU time which is measured by BenchExec.}. The columns show the number of correctly analyzed programs divided into found proofs and alarms.
+Additionally the wrong results are displayed. As only safe programs were erroneously treated as unsafe programs the other column was left out. The statistics about
+invariants show the \textbf{time} and the amount of invariant generation \textbf{attempts} as well as the amount of successful invariant generations (\textbf{succ}) for all equal
+and correct verification runs. The last part of the table are the statistics about the CPU time.
+
+The table shows that all lightweight invariant-generation approaches take too much
+time away from the main analysis, and furthermore, in this time not enough, or not the required invariants are found. The approaches of weakening path formulas or checking the conjuncts of
+path formulas transformed into a \ac{CNF} were used about \num{6000} times per configuration over all correctly analyzed programs, but not a single valid invariant could be generated. This
+can also be seen from the CPU time taken by the equal verification runs: The time for analyzing these programs increased approximately by the time needed for the invariant generation
+tries. Due to the higher time consumption also fewer programs could be analyzed in time.
+
+Path invariants and checking interpolants on invariance lead to even worse results. While these configurations are able to generate invariants --- and both add the invariants to the precision ---
+they are taking even more time and therefore the performance suffers. For \textbf{path-policy} and \textbf{base300} the difference in the CPU time is over \SI{4}{\hour} higher than the time for the invariant
+generation. This leads to the conclusion that the invariants have a negative impact on the performance, which could be the case for example, by adding predicates
+to the precision which force that loops have to be unrolled, an issue we wanted to overcome with these approaches\,\sidenote{\Eg, the predicate \mbox{\texttt{i = i + 1}} with \texttt{i} being a loop counter could cause this issue. An example where such formulas are found as interpolant, and the invariant is helpful follows in the section about the results with path invariants.}.
+More insights into the four heuristics are given in the following sections.
+
+\subsubsection*{Weakening of Path Formulas}\label{title:evalWeakening}
+Weakening path formulas up to the point where the remaining formula is an invariant did not work as expected. As can be seen in \autoref{table:lightweight_overall}, this approach did not find any 
+invariants. Without invariants all configurations we have tested are the same, as they only differ in where the invariants would be added. So besides minor changes to the results, which are caused by tasks
+that can be analyzed in approximately \SI{300}{\second} and therefore time out in some configurations but are successfully analyzed in other configurations, there is no difference. Upon further investigation 
+we found several bugs in the usage and implementation of the reduced \ac{CNF} conversion, they are fixed on later revisions of \CPAchecker{} than the evaluation was made on. An additional limitation to 
+solvers that support quantifiers was necessary. Quantification is used for removing variables not having the most up to date SSA index in the process of converting a path formula to a reduced \ac{CNF}. The 
+combination of bitvectors and quantifiers is only possible with the \ac{SMT} solver \ZT{}. Unfortunately the integration of this solver in \CPAchecker{} is not perfect, and the results are not comparable to 
+analyses with \MathSAT{}.
+
+
+\begin{table}
+\centering
+\caption{Details on analysis using weakening or checking path formula conjuncts with \ZT{} instead of \MathSAT{}}
+\label{table:heurZ3}
+\begin{adjustbox}{max width=.8\textwidth}
+\begin{tabular}{l
+                  S[table-format=4.0, round-mode=off, round-precision=3]
+                  S[table-format=3.0, round-mode=off, round-precision=3]
+                  S[table-format=1.0, round-mode=off, round-precision=3]
+                  S[table-format=2.0, round-mode=off, round-precision=3]
+                  S[table-format=4.0, round-mode=off, round-precision=3]
+                  S[table-format=4.0, round-mode=off, round-precision=3]}
+\toprule
+ & \multicolumn{2}{c}{\textbf{correct}} & \multicolumn{2}{c}{\textbf{wrong}} &  \multicolumn{2}{c}{\textbf{Invariants (all)}}\\              
+ & \multicolumn{1}{c}{proof} & \multicolumn{1}{c}{alarm} & \multicolumn{1}{c}{proof} & \multicolumn{1}{c}{alarm} & \multicolumn{1}{c}{attempts} & \multicolumn{1}{c}{succ} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+
+\textbf{z3-base300} & 1155 & 297 & 0 & 21 & & \\
+\textbf{z3-weakening-abs} & 1047 & 249 & 5 & 25 & 7802 & 5523 \\
+\textbf{z3-weakening-prec} & 965 & 250 & 0 & 20 & 8442 & 6026 \\
+\textbf{z3-int-check-abs} & 1111 & 254 & 0 & 18 & 6976 & 1648 \\
+\textbf{z3-int-check-prec} & 1093 & 249 & 0 & 21 & 7117 & 1792 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\autoref{table:heurZ3} shows some experimental results made with revision 23206~(\emph{trunk}). Instead of \MathSAT{}, \ZT{} was used. This leads to a drastic performance decrease. By comparing 
+\textbf{base300} with \textbf{z3-base300} we can see that 492 fewer tasks can be verified successfully. When using weakening of path formulas for invariant generation, the number of successfully analyzed 
+tasks decreases even further, although the ratio of invariant generation attempts to successful invariant generations is higher than for the other lightweight heuristics.
+
+\subsubsection*{Checking Conjuncts of Path Formulas on Invariance}
+This approach transforms a path formula to a reduced conjunctive normal form and checks the conjuncts on invariance with $k$-induction. As explained in \autoref{title:evalWeakening} the conversion of
+formulas to reduced conjunctive normal forms does not work as expected with \MathSAT{}. Some experimental results with \ZT{} can be found in \autoref{table:heurZ3}. While this approach is strictly better
+than weakening path formulas, it is still not able to correctly analyze as many tasks as \textbf{z3-base300} does.
+
+The main difference of this approach and the weakening of path formulas is how the conjuncts are checked on invariance. Here we use $k$-induction as a separate analysis for finding 1-
+inductive invariants. In contrast, weakening uses counterexamples to remove conjuncts which cannot be part of the final invariant~\cite{Karpenkov:Slicing}. Both approaches can currently
+only be used with \ZT{} and therefore suffer from a worse performance than analyses using \MathSAT{}. Additionally it seems that generating invariants with these approaches has no beneficial influence on the 
+analyses. What can be seen, is that \textbf{-abs} configurations perform better than \textbf{-prec} configurations, which is caused by the computational overhead of adding invariants to the precision. This 
+observation can be made for all invariant generation approaches we have evaluated.
+
+\subsubsection*{Checking Interpolants on Invariance}
+\input{tableContents/interpKind_results}
+Checking interpolants on invariance with $k$-induction is assumed to be a rather lightweight-invariant generation approach. Slicing infeasible counterexample paths into several infeasible prefixes
+and choosing one of them for interpolant computation~\cite{Beyer:RefinementSelection} is a technique that tries to guide the refinement such that the found predicates have a more positive impact on the
+analysis than choosing another infeasible prefix would have. We extend this approach to not only search for one infeasible prefix that is used for interpolant computation, but instead we compute interpolants for each of the infeasible prefixes and afterwards check the computed interpolants on 1-inductivity.
+
+\autoref{table:interpKind} shows the results for computing invariants with that strategy combined with all usage strategies we introduced earlier. All configurations using invariants are strictly worse
+than \textbf{base300}. Fewer verification tasks --- safe and unsafe --- could be analyzed successfully, and the overall CPU time increases from \SI{149}{\hour} to over \SI{160}{\hour}.
+When looking only at the equal and correct tasks, the difference is growing to almost \SI{10}{\hour}, an increase in the time spent of over \SI{50}{\percent}.
+Most of the additional time, about \SI{7}{\hour}, is spent by trying to generate invariants, which is
+successful in approximately 1 out of 6 cases. The time for invariant generation is however not measured as CPU time but as wall time, such that the comparison of these times makes not much sense.
+
+%The other 3\,h are needed additionally for the main analysis which is quite unexpected as the invariants should be used for speeding up the analysis and not for slowing it down.
+
+\input{tableContents/interpKind_increase}
+
+To take a closer look at the differences in time consumption, \autoref{table:interpKind_detail} shows the CPU time and wall time separately for the correct and equal analyzed verification tasks that either
+failed or  succeeded to use invariants. It is surprising that the increase in CPU time is higher for the tasks where invariant generation was successful. Compared to the baseline
+about \SI{40}{\percent} more time are needed for these tasks but only \SI{13}{\percent} more time is needed for the tasks where invariant generation was not successful.
+When using the wall time instead of the CPU time for
+comparison, the numbers are changing, for unsuccessful invariant generation the time decreases by \SIrange{2}{4}{\percent}
+and for the successful invariant generation even from \SIrange{2}{10}{\percent}.
+Both comparisons lead to the conclusion that other threads are influencing our measurement, and in fact when executing the benchmark set limited to one virtual core, wall time and CPU time are equal and
+the time for generating invariants is still smaller then the difference in the measured times. Our research did not come to any conclusion where the additional time --- accounting about \SI{3}{\hour} in our
+experiments --- could be spent. Invariant generation, as well as all other parts of \CPAchecker{}, are run single-threaded, the \ac{SMT} solver \MathSAT{} is also running single-threaded and while 
+profiling the application we did not find any additional threads being used. Also when looking at the ratio of wall and CPU time, it stays approximately the same for the tasks with failed invariant 
+generation (about \SI{50}{\percent}) and successful invariant generation (about \SI{90}{\percent}), which means that there is no evidence for additional
+time in configurations with invariant generation in particular, but a part
+of the used CPU time is always spent differently, for example, for garbage collection or resource measurement.
+
+
+When we look back at \autoref{table:interpKind} we can see that some of the configurations have one unsafe verification task,
+\texttt{ldv-linux-3.0/usb\_urb-drivers-input-misc-keyspan\_re\\mote.ko\_false-unreach-call.cil.out.i.pp.i}, where the analyses concluded that this program is safe.
+This is a side-effect of using invariants. Without invariants the analysis of this task does not terminate, with invariants being added to either the path or the abstraction formula, the analysis
+terminates and reports a wrong result. The baseline is not able to analyze this program, even in \SI{900}{\second}. Therefore we do not know if the wrong result is caused by invalid invariants,
+a wrong usage of invariants or if the program cannot be analyzed correctly with the given \textbf{base300} configuration. In the SV-COMP~2016 there were two tools that terminated in time, one
+of them (Blast) reported a specification violation, so we can be sure that the problem is not that this verification task has a wrong label.
+
+Another remarkable point is that some of the tasks are running into a timeout because of the sliced prefix generation. This issue can be observed better with increasing amount of possible
+slices that need to be tested. The initial idea was to increase the number of abstraction states by changing the block operator $\blk$ (cf. \autoref{title:predicatecpa})
+such that abstractions should be computed more often. The default configuration
+is that an abstraction is only computed at each occurrence of a loop head. We add that additionally, an abstraction is computed when control-flow meets. With this modification, the infeasible
+counterexamples consist of more abstraction states than before, which means that there are also more states that can be removed for creating different infeasible prefixes. But with this increased
+number of possibilities, the number of timeouts rises, for example, for \textbf{int-check-abs} from \num{1563} to \num{2394}. At the same time \textbf{base300} has \num{1414} timeouts. For all other
+configurations for generating invariants with
+this approach the numbers are comparable. The reason for the longer prefix generation times is, in our opinion, that removing certain formulas from the satisfiability check has an impact on the \ac{SMT}
+solver, which is in turn not able to prove unsatisfiability. Formulas leading to such a behavior when removed could, \eg, be related to pointer-aliasing handling, because for that, many relations are
+introduced. By removing some relations, the possible state space grows and makes the unsatisfiability-check harder.
+
+Overall checking interpolants on invariance with $k$-induction seems to be working for only a small set of verification tasks. For the other tasks, either the invariant generation takes too long, or the
+found invariants do not influence the analysis in the expected way. The idea to increase the amount of interpolants being checked by changing the behavior of the $\blk$ operator made the performance even worse.
+While more infeasible sliced prefixes do also mean more interpolants, and potentially a higher success rate in finding invariants, the additional time necessary for the prefix generation is just too high.
+
+\subsubsection*{Path Invariants}
+\input{tableContents/pathinvariants_overall_results}
+As stated in \autoref{related:pathInv} and \autoref{background:pathinvariants}, path invariants were already a part of the \CPAchecker{} framework before this master's thesis, but during this work we
+found an issue with the old implementation. The conversion of formulas did not consider different pointer encodings and thus lead to wrong formulas used as precision increment in the \PredicateCPA{}.
+This was not recognized, because adding additional formulas to the precision --- correct and incorrect ones --- does not lead to wrong behavior, only the runtime increases with increasing size of the
+precision. In our earlier work we found analyses using path invariants generated by the \InvariantsCPA{} or the \PolicyCPA{} perform better than the baseline in terms of the number of correctly
+analyzed tasks. Path invariants improved the results by about \SI{1.5}{\percent}\,\sidenote{This is not comparable to our results as we use bit-precise analyses and the earlier evaluation used unbounded integers and 
+rationals.}. When it comes to the time measured, analyses with path invariants took significantly longer (more than \SI{10}{\percent}) than the baseline.
+This comes on the one hand from the time needed for the invariant generation, and on the other hand from the additional time needed for repeated refinements, if the generated invariants were not
+strong enough to refute the counterexample\,\sidenote{This can be the case due to over-approximation while converting the formulas or because of the fact that the formula encoding was not correct,
+and therefore many formulas added to the precision could not be used afterwards.}.
+
+Our evaluation shows completely different results. The number of successfully analyzed tasks while using path invariants is about \SI{4}{\percent} lower than \textbf{base300}.
+This is mainly caused by the additional time needed for invariant generation. When increasing the time limit to \SI{400}{\second} (\textbf{400s-inv}, \textbf{400s-policy}),
+only verification tasks where the invariant generation is successful have a changing outcome, such that the overall results become approximately equal to \textbf{base300}. In
+\autoref{table:pathinv_overall} one can see that while \textbf{path-policy} takes about \SI{1.5}{\hour} more time for generating invariants compared to \textbf{path-inv}, it
+can successfully analyze \num{20} tasks more, and additionally the CPU time for equally and successfully analyzed tasks is approximately \SI{0.8}{\hour} less than for
+\textbf{path-inv}. This behavior is less noticeable for the \textbf{400s} configurations but still the analysis using the \PolicyCPA{} performs better.
+
+What is also interesting is that there are many tasks that can be correctly analyzed by \textbf{base300} in \SI{15}{\second} to \SI{30}{\second}, but are running into a timeout with \textbf{path-inv} and 
+\textbf{path-policy}. The invariant generation in these cases is not the problem; instead the usage of the generated invariants leads to loop unrollings, and in turn, to more refinements than 
+\textbf{base300}. The aim of path invariants was initially to prevent loop unrollings (and therefore refinements) but it seems that this is not working as expected with this invariant generation 
+strategy. From \autoref{table:pathinv_overall} we can see furthermore that the number of correctly analyzed safe programs decreases in a higher ratio than the number of correct alarms. For the \textbf{400s} 
+analyses, the number of correct alarms is even higher than \textbf{base300}, while the number of correct proofs is still smaller than \textbf{base300}.
+
+\begin{table}
+ \caption{A selection of tasks and their results with path invariants}
+ \label{table:pathinv_detail_succ}
+\begin{adjustbox}{max width=\textwidth}
+  \begin{tabular}{lll}
+  \toprule
+  \textbf{file name} & \textbf{path-inv} & \textbf{path-policy} \\
+  \cmidrule(lr){1-1}\cmidrule(lr){2-2}\cmidrule(lr){3-3}
+loop-acceleration/array\_true-unreach-call3.i & ✓ & ✗ \\
+loop-acceleration/functions\_true-unreach-call1.i & ✗ & ✓ \\
+loop-acceleration/nested\_true-unreach-call1.i & ✓ & ✗  \\
+loop-acceleration/simple\_true-unreach-call1.i & ✗ & ✓ \\
+loop-new/count\_by\_1\_true-unreach-call.i & ✓ & ✗ \\
+loop-new/count\_by\_1\_variant\_true-unreach-call.i & ✓ & ✗ \\
+loop-new/count\_by\_nondet\_true-unreach-call.i & ✗ & ✓ \\
+\bottomrule
+ \end{tabular}
+ \end{adjustbox}
+
+\end{table}
+
+Both path invariant generation approaches yield better results than \textbf{base300} for the tasks in the loops category. The tasks in the loops category do not consist of many lines of code. Instead
+they have loops and some conditions that are complicated to track without having relations between variables. While \textbf{base300} times out on some of the tasks after \SI{300}{\second},
+either \textbf{path-inv} or \textbf{path-policy} are able to successfully prove the safety of these programs (cf. \autoref{table:pathinv_detail_succ}). Furthermore, the safety of
+these tasks can be proved within \SI{10}{\second}. So the 
+speedup due to the invariants is enormous. For all these tasks \textbf{base300} times out after many refinements, with invariants only a small amount of refinements (between one and five) are necessary. 
+Most of the computed invariants are very simple, for example, for the task \emph{loop-new/count\_by\_1\_true-unreach-call.i} (cf. \autoref{listing:easyinv}) the computed invariant
+is that at the location of their \texttt{\_\_VERIFIER\_assert} call \texttt{i = 10000}. This is very helpful in contrast to the interpolants found by the \ac{SMT} solvers, which
+force a loop unrolling in this case, because in each loop iteration the interpolant found is just that \texttt{i} equals the next higher number.
+
+
+\begin{lstlisting}[language=C, label=listing:easyinv, caption=The source code of \mbox{loop-new/count\_by\_1\_true-unreach-call.i}, float, captionpos=b, frame = single]
+ int main() {
+    int i;
+    for (i = 0; i < 1000000; i++) ;
+    __VERIFIER_assert(i == 1000000);
+    return 0;
+}
+\end{lstlisting}
+
+To sum up, we have three cases, first there are tasks where invariant generation is not successful and thus the additional time spent effectively slows down the analysis. Second, there are 
+tasks where invariant generation is successful, but the found invariants slow down the analysis, for example by forcing a loop to be unrolled. Unfortunately this case is appearing to be more common than the 
+last case where the auxiliary invariants speed up the analysis. The last case leads, in many cases, to results within seconds where otherwise five minutes are not enough to analyze the verification task.
+For a better performance it will therefore be necessary to classify the error traces and only compute path invariants for certain cases. Such conditions could, \eg, be that the loops in the infeasible 
+counterexample path do not consist of more than \texttt{X} statements, or that the loop conditions and the loop iteration statements may only be simple increment or decrement operations. In general, taking 
+the complexity of the loop body into account might help, but finding appropriate heuristics for that is future work.

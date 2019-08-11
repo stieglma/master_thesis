@@ -1,0 +1,188 @@
+(assert 
+  (or 
+    (and 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |chain_node::ppnode@3|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= 
+        (|*(struct_node)*@11| |create_sll::pp2@2|) 
+        (_ bv0 32)
+      ) 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |__ADDRESS_OF_main::p1|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= 
+        (|*(struct_node)*@11| |create_sll::pp1@2|) 
+        (_ bv0 32)
+      ) 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |__ADDRESS_OF_main::p2|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= |main::list@3| 
+        (_ bv0 32)
+      ) 
+      (= 
+        (|*(struct_node)*@11| |__ADDRESS_OF_main::p2|) |check_seq_next::end@2|) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_0@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_0@3|)
+      ) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_1@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_1@3|)
+      ) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_2@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_2@3|)
+      )
+    )
+    
+    (and 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |chain_node::ppnode@3|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= 
+        (|*(struct_node)*@11| |create_sll::pp2@2|) 
+        (_ bv0 32)
+      ) 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |__ADDRESS_OF_main::p1|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= 
+        (|*(struct_node)*@11| |create_sll::pp1@2|) 
+        (_ bv0 32)
+      ) 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |__ADDRESS_OF_main::p2|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= |main::list@3| 
+        (_ bv0 32)
+      ) 
+      (= 
+        (|*(struct_node)*@11| |__ADDRESS_OF_main::p2|) |check_seq_next::end@2|) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_0@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_0@3|)
+      ) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_1@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_1@3|)
+      ) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_2@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_2@3|)
+      )
+    )
+
+    (and 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |chain_node::ppnode@3|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= 
+        (|*(struct_node)*@11| |__ADDRESS_OF_main::p1|) |check_seq_next::end@2|) 
+      (= 
+        (|*(struct_node)*@11| |create_sll::pp2@2|) 
+        (_ bv0 32)
+      ) 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |__ADDRESS_OF_main::p1|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= 
+        (|*(struct_node)*@11| |create_sll::pp1@2|) 
+        (_ bv0 32)
+      ) 
+      (not 
+        (= 
+          (|*(struct_node)*@11| |__ADDRESS_OF_main::p2|) 
+          (_ bv0 32)
+        )
+      ) 
+      (= |main::list@3| 
+        (_ bv0 32)
+      ) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_0@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_0@3|)
+      ) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_1@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_1@3|)
+      ) 
+      (not 
+        (bvslt |create_sll::__CPAchecker_TMP_2@3| 
+          (_ bv2147483648 32)
+        )
+      ) 
+      (not 
+        (bvslt 
+          (_ bv2147483647 32) |create_sll::__CPAchecker_TMP_2@3|)
+      )
+    )
+    )
+  )
+)
+

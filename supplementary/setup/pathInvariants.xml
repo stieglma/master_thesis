@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!DOCTYPE benchmark PUBLIC "+//IDN sosy-lab.org//DTD BenchExec benchmark 1.0//EN" "http://www.sosy-lab.org/benchexec/benchmark-1.0.dtd">
+<benchmark tool="cpachecker" timelimit="300 s" hardtimelimit="350 s" memlimit="8 GB" cpuCores="4">
+  <option name="-noout"/>
+  <option name="-heap">6000M</option>
+  <option name="-setprop">solver.solver=MATHSAT5</option>
+  <option name="-setprop">cpa.predicate.encodeBitvectorAs=BITVECTOR</option>
+  <option name="-setprop">cpa.predicate.encodeFloatAs=FLOAT</option>
+  <option name="-setprop">cpa.predicate.refinement.performInitialStaticRefinement=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantFields=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantVariables=false</option>
+
+  <propertyfile>${inputfile_path}/ALL.prp</propertyfile>
+
+  <tasks name="Other_false">
+    <includesfile>benchmarkOther_false.set</includesfile>
+  </tasks>
+    <tasks name="Other_true">
+    <includesfile>benchmarkOther_true.set</includesfile>
+  </tasks>
+  <tasks name="x64_false">
+    <includesfile>benchmark64_false.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+    <tasks name="x64_true">
+    <includesfile>benchmark64_true.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+  <tasks name="Loops_false">
+    <includesfile>benchmarkLoops_false.set</includesfile>
+  </tasks>
+    <tasks name="Loops_true">
+    <includesfile>benchmarkLoops_true.set</includesfile>
+  </tasks>
+
+  <!-- generate local invariants out of error path which can only be used for refining the precision -->
+  <rundefinition name="pathInvariants-invCPA">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.refinement.usePathInvariants=true</option>
+    <option name="-setprop">invariantGeneration.config=config/invariantGeneration-no-out.properties</option>
+  </rundefinition>
+  <rundefinition name="pathInvariants-policyCPA">
+    <option name="-predicateAnalysis-bitprecise"/>
+    <option name="-setprop">cpa.predicate.refinement.usePathInvariants=true</option>
+    <option name="-setprop">invariantGeneration.config=config/policy-invariants.properties</option>
+    <option name="-setprop">cfa.findLiveVariables=true</option>
+  </rundefinition>
+
+</benchmark>

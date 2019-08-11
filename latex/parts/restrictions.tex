@@ -1,0 +1,22 @@
+\chapter{Restrictions and Challenges}
+While implementing the invariant generation and usage approaches for this thesis we encountered several difficulties. These are described in the following sections.
+
+\section{Large Formulas}
+Invariant generation with the approaches we have implemented is either based on path formulas or interpolants that are transformed, or on separate analyses where the invariants are generated out of the 
+reached set of the separate analysis. All cases have in common that for most verification tasks the formulas that need to be handled are very large. Printing them would take several sheets of paper and 
+therefore debugging is hard. Some problems can also only be observed for one or two tasks of the benchmark set, making them hard to find. This is for example the case for the differing pointer encoding 
+described in \autoref{title:evalParallel}. In general, encoding issues caused by transforming states of one \ac{CPA} to formulas for the \PredicateCPA{} were the main point we had to work on, while
+implementing invariant generation approaches based on other analyses.
+
+\section{External Invariant Generators}\label{restrictions:invgen}
+The initial idea for this thesis was not to create many invariant generation approaches on our own, but to use existing invariant generators and supply the found invariants to our analysis. Unfortunately 
+we did not find suitable invariant generators. All of the ones we found have individual drawbacks that make their usage for our purpose impossible. \InvGen{} and \Daikon{} are already mentioned in 
+\autoref{related:other}. Both look very promising, but the requirement of the \InvGen{} front end that only programs with exactly one function, and neither arrays, nor pointers 
+are allowed makes this invariant generation unusable for us. The front end of \Daikon{} is able to handle all C programs we need, however it is just instrumenting the program and then tries to deduce 
+likely invariants out of the values observed during run time. This means we cannot have any non-determinism in our programs. We can only simulate non-determinism by either using fixed random numbers (and 
+therefore limiting the state-space before the analysis, which is unsound), or by using a random number generator directly (this will most likely lead to non-termination, and is not sound either).
+Overall every attempt to integrate one of these invariant generators failed, so we had to implement some invariant generation approaches ourselves.
+
+
+
+

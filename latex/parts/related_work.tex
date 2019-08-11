@@ -1,0 +1,156 @@
+\chapter{Related Work}
+A typical area where auxiliary invariants are used is software verification with \Kinduction{}-based
+model checkers~\cite{Beyer:KInduction, Awedh:KInduction-Inv, Kahsai:Kinduction-Inv}.
+Other than that invariants can be combined with \ac{CEGAR}~\cite{Beyer:PathInvariants} or they
+are computed in a separate (potentially parallel) analysis solely for the purpose of
+improving the main analysis~\cite{Gurfinkel:Seahorn}.
+
+The invariant generation itself is a separate process which is integrated into the
+software verifiers. While there exist some potentially usable invariant
+generators~\cite{Gupta:InvGen, Ernst:Daikon, Awedh:KInduction-Inv} they are either written
+for other programming languages like Lustre~\cite{Lustre} or they are not yet mature enough
+for analyzing real-world C programs (cf. \autoref{related:other}). The only
+reasonably working invariant generation for our case is provided by \CPAchecker{} itself,
+and was initially implemented for continuously-refined invariants
+used together with \mbox{\Kinduction{}}~\cite{Beyer:KInduction}.
+
+
+\section{Model Checkers Using Invariants}
+
+In practice, \PKIND{}\,\sidenote{\PKIND{} is a model checker based on $k$-induction.} and some configurations of the \CPAchecker{} framework
+often need auxiliary invariants to
+make the analysis terminate at all. This is due to a general problem with \Kinduction{}-based
+verifiers: \Kinduction{}  itself does not distinguish between reachable and unreachable parts
+of the space space of a program~\cite{Beyer:KInduction}\,\sidenote{For more information on this problem, see \autoref{title:kind}.}, but safety properties often do not hold in unreachable
+parts of the state space.
+
+Invariant generation running in parallel to the model checker was introduced by \PKIND{}.
+Their invariant generation is also based on \Kinduction{}, which is used to check
+\emph{candidate invariants} synthesized out of predefined templates. To leverage the
+advantages of parallelism, \Kinduction{} for invariant generation is set up to firstly check
+0-inductivity and return the valid invariants, and then continuously increase $k$ returning
+the newest invariants found for each $k$~\cite{Kahsai:Kinduction-Inv}. A comparable
+approach was also implemented in \CPAchecker{} and furthermore another invariant generation
+strategy based on a data-flow analysis was added~\cite{Beyer:KInduction}.
+
+\TWOLS{}~\cite{Brain:2LS} is a tool that is based on BMC, \Kinduction{} and abstract interpretation.
+The three verification approaches are combined such that with abstract interpretation, invariants
+are generated out of given templates, and these invariants are used for \Kinduction{}.
+If an error location is found to be reachable, it is double-checked with BMC.
+
+\SeaHorn{}~\cite{Gurfinkel:Seahorn} is a program-verification framework implemented in
+LLVM\cite{LLVM}. It converts LLVM bitcode to horn clauses and then, uses the PDR / IC3
+algorithm with the \ac{SMT} solver Z3~\cite{Hoder:SeahornPDR} to verify the safety of the program. Additionally
+the IKOS~\cite{Brat:Ikos} library can be used to generate invariants from the LLVM bitcode,
+which are then also encoded as horn clauses and added to the program that should be verified. According
+to their evaluation, the additional invariants improve the verification process such that
+some tasks that ran into timeouts before (without auxiliary invariants), can be successfully verified.
+
+\Dafny{}~\cite{Leino:Dafny} is a programming language which has built-in support for
+specifications. These specifications are part of the code and they are used for verifying
+the correctness of the corresponding
+program with the \Dafny{} static program verifier. This verifier is run as part of the
+compiler, and only if the code was successfully verified, a binary is created. The given
+specifications can be seen as invariants given by the programmer. This is also the main
+difference to the aforementioned tools: invariants are not computed automatically, but
+instead they are given by the user. If the compiler is not able to prove the given
+invariants, it stops and asks for a more concise specification, for example, the split of
+one specification into several lemmata can help the compiler check the
+specification.
+
+In contrast to \Kinduction{}-based model checkers, where the invariants are strictly needed,
+this work aims at creating and using invariants with analyses that do not need them,
+comparably to \SeaHorn{}. They can then be used to replace interpolants up to a certain
+degree, or to just have some additional formulas to strengthen states at certain
+locations with the aim of speeding up the analysis. Unlike \Dafny{} we do not need 
+user-interaction but instead completely rely on automatic invariant generators.
+
+
+\section{Path Invariants}\label{related:pathInv}
+Path invariants are another approach to creating lightweight invariants. The idea is to not
+use whole programs for invariant generation, which in most cases is very costly, but instead
+generating invariants only for small subprograms, by combining
+invariant generation with \ac{CEGAR}. If a found error location is known to be
+infeasible, a path program --- a semantically correct program, consisting only of the error
+path and all (potentially unrolled) loops in it --- is created, which is then used for
+invariant generation~\cite{Beyer:PathInvariants}. The generated invariants are only
+invariants for this specific path program and not for the whole program, and thus they can
+generally not be used in all cases where real invariants could be used (cf.
+\autoref{background:pathinvariants}).
+
+A first approach on implementing path invariants in \CPAchecker{} exists\,\sidenote{The
+  implementation of path invariants in \CPAchecker{} was done by me during a seminar on
+  Software Verification, it can be found at \url{stieglmaier.me/projects.html}.}, its
+capabilities and the usability were greatly enhanced for this master's thesis.
+
+\section{Loop Acceleration}
+Finding compact but still sufficiently precise loop invariants is a struggle for
+real-world C programs. In many cases, loops are unrolled which gets more ineffective with
+increasing loop sizes. A technique for summarizing loops is \emph{acceleration}. At
+first, a closed-form representation of the loop-behavior is computed, which is then turned
+into an \emph{accelerator} --- a code snippet, skipping intermediate loop states to the
+loop end in one step. While in general, finding accelerators is as difficult as the
+verification problem itself, restricting the acceleration to some special cases, for example,
+linear loops~\cite{Jeannet:LoopAcceleration}, makes it a good addition for program
+analyzers~\cite{Madhukar:LoopAcceleration}. The accelerator is not an invariant itself but
+supports the invariant synthesis done by program analyzers. Loop acceleration can either
+be done as a preprocessing which results in a new, instrumented, code file, or 
+during the analysis as it is done with Aspic and C2fsm~\cite{Feautrier:LoopAcceleration}.
+
+Loop acceleration is a heuristic that is used to support program analyzers just like we
+evaluate the usage of lightweight invariants for this case. A combination of both
+approaches is future work.
+
+\section{Other Invariant Generators}\label{related:other}
+Besides the directly mentioned invariant generation approaches in the last two sections,
+there exist several standalone tools generating invariants for certain programming
+languages:
+
+\InvGen{}~\cite{Gupta:InvGen} is an automatic linear-arithmetic invariant generator for
+imperative programs. Invariants are synthesized at each cut-point location (for example at loop
+entries) out of templates, consisting of parameterized linear inequalities over program
+variables. \InvGen{} takes as input a set of transition relations written in Prolog
+syntax. C is only supported partially by a frontend which converts a subset of C ---
+neither function calls, nor arrays and pointers are supported --- to the required input
+language.
+
+\Daikon{}~\cite{Ernst:Daikon} is a dynamic detector of likely invariants. Before running
+the program it is instrumented and during the runtime the computed values are observed.
+This results in invariants that hold for the execution of this single run, by for example
+changing the user input of the program the found invariants may change. In contrast to
+\InvGen{}, this approach fully supports C, the only drawback is the lacking support for
+non-determinism, another essential part of almost every program (\eg, user input, sensor
+data)\,\sidenote{This does also mean that the found likely invariants are only applicable for a given user input.}.
+ 
+%None of the tools can be used for real-world C programs due to restrictions on the accepted input language, \eg the C frontend of \InvGen{} does neither support arrays and pointers, nor function calls~\cite{Gupta:InvGen}. Another invariant generator is \Daikon{}, unlike other tools in this domain \Daikon{} generates likely invariants during runtime of the program by before instrumenting it~\cite{Ernst:Daikon}. While this approach fully supports C, it lacks support for non-determinism, an essential part of every program (\eg user input, sensor data).
+
+There exist much more invariant generators using different techniques, \eg, abstract
+interpretation~\cite{Lahiri:invAbstractInt} or abduction~\cite{Dillig:abduction}, another
+one is based on assertions in the program~\cite{Janota:assertion}. All these approaches
+have in common that they are bound to a specific input language, and the implementation of
+these approaches do mostly also only support this language without any extensions, making
+them unusable for invariant generation of real-world C programs.
+
+Invariants can also be generated with \CPAchecker{} by running an analysis and afterwards
+analyzing the set of reached states. The disjunction of all states for a location builds the
+invariant for that location if the analysis was sound and every possible state was
+explored~\cite{Beyer:KInduction}. This approach is language agnostic\,\sidenote{The only
+  limit for languages we have is given by the supported languages of \CPAchecker{}, which
+  are currently C and Java. The technique itself is applicable to any language.}, easy to
+use and fulfills all requirements needed for this work. It will be used and extended
+within this master's thesis.
+
+\section{Conditional Model Checking}\label{title:cmc}
+While in traditional model checking, the result of a verification run is either \emph{safe} or
+\emph{unsafe}\,\sidenote{\emph{Unknown} may be a valid result, too, in case of timeouts or other problems.},
+in conditional model checking~\cite{Beyer:ConditionalModelChecking},
+the result is a condition $\Psi$ under which the analyzed program satisfies a given specification. This is helpful
+in case of failures, as the consumed resources are not wasted, but instead the output conditions may speed up
+subsequent verification runs. For example, when a timeout occurs, the model checker could summarize the successfully
+analyzed part of the program in the output condition by declaring that as long as the program execution stays
+within this part, the program is safe. For a complete analysis, \emph{safe} is represented by $\Psi = \text{\true{}}$ and
+\emph{unsafe} is represented by $\Psi = \text{\false{}}$. While this approach has not much in common with the original idea
+of invariants, it is quite close to path invariants (information for a certain path of a program is computed by a
+one analysis and used by another analysis) and sequentially combined analyses\,\sidenote{For these analyses
+$\Psi$ will always be \false{}, but some other information computed in earlier analyses is passed to the next ones.}
+will be used for invariant generation in this thesis.

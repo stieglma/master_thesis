@@ -1,0 +1,279 @@
+(assert 
+  (and 
+    (bvslt 
+      (_ bv0 32) 
+      (bvadd 
+        (_ bv8 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+    ) 
+    (not 
+      (bvslt |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3| 
+        (bvadd 
+          (_ bv8 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+      )
+    ) 
+    (bvslt 
+      (_ bv0 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|) 
+    (= 
+      (ite 
+        (not 
+          (= malloc@3 
+            (_ bv0 32)
+          )
+        ) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3| 
+        (_ bv0 32)
+      ) |alloc_node::ptr@5|) 
+    (= |__ADDRESS_OF_create_sll::list| |chain_node::ppnode@3|) 
+    (not 
+      (= |alloc_node::ptr@5| 
+        (_ bv0 32)
+      )
+    ) 
+    (or 
+      (= |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3| |alloc_node::ptr@5|) 
+      (= 
+        (|*(struct_node)*@7| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|) 
+        (|*(struct_node)*@8| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+      )
+    ) 
+    (or 
+      (= |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2| |alloc_node::ptr@5|) 
+      (= 
+        (|*(struct_node)*@7| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|) 
+        (|*(struct_node)*@8| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+      )
+    ) 
+    (= 
+      (|*(struct_node)*@7| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+      ) 
+      (|*(struct_node)*@8| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+      )
+    ) 
+    (= 
+      (|*(struct_node)*@7| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+      ) 
+      (|*(struct_node)*@8| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+      )
+    ) 
+    (= 
+      (|*(struct_node)*@7| |__ADDRESS_OF_create_sll::list|) 
+      (|*(struct_node)*@8| |__ADDRESS_OF_create_sll::list|)
+    ) 
+    (= 
+      (|*(struct_node)*@7| |__ADDRESS_OF_main::p2|) 
+      (|*(struct_node)*@8| |__ADDRESS_OF_main::p2|)
+    ) 
+    (= 
+      (|*(struct_node)*@7| |__ADDRESS_OF_main::p1|) 
+      (|*(struct_node)*@8| |__ADDRESS_OF_main::p1|)
+    ) 
+    (= 
+      (|*(struct_node)*@8| |alloc_node::ptr@5|) 
+      (_ bv0 32)
+    ) 
+    (or 
+      (= |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3| |alloc_node::ptr@5|) 
+      (= 
+        (|*(struct_node)*@8| 
+          (bvadd 
+            (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+        ) 
+        (|*(struct_node)*@9| 
+          (bvadd 
+            (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+        )
+      )
+    ) 
+    (or 
+      (= |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2| |alloc_node::ptr@5|) 
+      (= 
+        (|*(struct_node)*@8| 
+          (bvadd 
+            (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+        ) 
+        (|*(struct_node)*@9| 
+          (bvadd 
+            (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+        )
+      )
+    ) 
+    (= 
+      (|*(struct_node)*@8| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|) 
+      (|*(struct_node)*@9| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+    ) 
+    (= 
+      (|*(struct_node)*@8| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|) 
+      (|*(struct_node)*@9| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+    ) 
+    (= 
+      (|*(struct_node)*@8| |__ADDRESS_OF_create_sll::list|) 
+      (|*(struct_node)*@9| |__ADDRESS_OF_create_sll::list|)
+    ) 
+    (= 
+      (|*(struct_node)*@8| |__ADDRESS_OF_main::p2|) 
+      (|*(struct_node)*@9| |__ADDRESS_OF_main::p2|)
+    ) 
+    (= 
+      (|*(struct_node)*@8| |__ADDRESS_OF_main::p1|) 
+      (|*(struct_node)*@9| |__ADDRESS_OF_main::p1|)
+    ) 
+    (= 
+      (|*(struct_node)*@9| 
+        (bvadd 
+          (_ bv4 32) |alloc_node::ptr@5|)
+      ) 
+      (_ bv0 32)
+    ) 
+    (= |alloc_node::ptr@5| |alloc_node::__retval__@3|) 
+    (= |alloc_node::__retval__@3| |chain_node::node@5|) 
+    (or 
+      (= |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3| |chain_node::node@5|) 
+      (= 
+        (|*(struct_node)*@9| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|) 
+        (|*(struct_node)*@10| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+      )
+    ) 
+    (or 
+      (= |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2| |chain_node::node@5|) 
+      (= 
+        (|*(struct_node)*@9| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|) 
+        (|*(struct_node)*@10| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+      )
+    ) 
+    (= 
+      (|*(struct_node)*@9| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+      ) 
+      (|*(struct_node)*@10| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+      )
+    ) 
+    (= 
+      (|*(struct_node)*@9| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+      ) 
+      (|*(struct_node)*@10| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+      )
+    ) 
+    (= 
+      (|*(struct_node)*@9| |__ADDRESS_OF_create_sll::list|) 
+      (|*(struct_node)*@10| |__ADDRESS_OF_create_sll::list|)
+    ) 
+    (= 
+      (|*(struct_node)*@9| |__ADDRESS_OF_main::p2|) 
+      (|*(struct_node)*@10| |__ADDRESS_OF_main::p2|)
+    ) 
+    (= 
+      (|*(struct_node)*@9| |__ADDRESS_OF_main::p1|) 
+      (|*(struct_node)*@10| |__ADDRESS_OF_main::p1|)
+    ) 
+    (= 
+      (|*(struct_node)*@9| |chain_node::ppnode@3|) 
+      (|*(struct_node)*@10| |chain_node::node@5|)
+    ) 
+    (or 
+      (= |chain_node::ppnode@3| 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+      ) 
+      (= 
+        (|*(struct_node)*@10| 
+          (bvadd 
+            (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+        ) 
+        (|*(struct_node)*@11| 
+          (bvadd 
+            (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+        )
+      )
+    ) 
+    (or 
+      (= |chain_node::ppnode@3| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|) 
+      (= 
+        (|*(struct_node)*@10| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|) 
+        (|*(struct_node)*@11| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#3|)
+      )
+    ) 
+    (or 
+      (= 
+        (bvadd 
+          (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|) |chain_node::ppnode@3|) 
+      (= 
+        (|*(struct_node)*@10| 
+          (bvadd 
+            (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+        ) 
+        (|*(struct_node)*@11| 
+          (bvadd 
+            (_ bv4 32) |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+        )
+      )
+    ) 
+    (or 
+      (= |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2| |chain_node::ppnode@3|) 
+      (= 
+        (|*(struct_node)*@10| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|) 
+        (|*(struct_node)*@11| |__ADDRESS_OF___VERIFIER_successful_alloc_*void#2|)
+      )
+    ) 
+    (or 
+      (= |__ADDRESS_OF_create_sll::list| |chain_node::ppnode@3|) 
+      (= 
+        (|*(struct_node)*@10| |__ADDRESS_OF_create_sll::list|) 
+        (|*(struct_node)*@11| |__ADDRESS_OF_create_sll::list|)
+      )
+    ) 
+    (or 
+      (= |__ADDRESS_OF_main::p2| |chain_node::ppnode@3|) 
+      (= 
+        (|*(struct_node)*@10| |__ADDRESS_OF_main::p2|) 
+        (|*(struct_node)*@11| |__ADDRESS_OF_main::p2|)
+      )
+    ) 
+    (or 
+      (= |__ADDRESS_OF_main::p1| |chain_node::ppnode@3|) 
+      (= 
+        (|*(struct_node)*@10| |__ADDRESS_OF_main::p1|) 
+        (|*(struct_node)*@11| |__ADDRESS_OF_main::p1|)
+      )
+    ) 
+    (= |chain_node::node@5| 
+      (|*(struct_node)*@11| |chain_node::ppnode@3|)
+    ) 
+    (= __VERIFIER_nondet_int@4 |create_sll::__CPAchecker_TMP_2@3|) 
+    (= |create_sll::__CPAchecker_TMP_2@3| 
+      (_ bv0 32)
+    ) 
+    (= 
+      (|*(struct_node)*@11| |__ADDRESS_OF_create_sll::list|) |create_sll::__retval__@2|) 
+    (= |create_sll::__retval__@2| |main::list@3|) 
+    (= 
+      (|*(struct_node)*@11| |__ADDRESS_OF_main::p1|) |check_seq_next::beg@2|) 
+    (= 
+      (|*(struct_node)*@11| |__ADDRESS_OF_main::p2|) |check_seq_next::end@2|) 
+    (not 
+      (= |check_seq_next::beg@2| 
+        (_ bv0 32)
+      )
+    ) 
+    (not 
+      (= |check_seq_next::end@2| 
+        (_ bv0 32)
+      )
+    ) 
+    (= 
+      (|*(struct_node)*@11| |check_seq_next::beg@2|) |check_seq_next::beg@3|)
+  )
+)

@@ -1,0 +1,504 @@
+\documentclass{beamer}
+\usetheme[titleformat=smallcaps,sectionpage=none,progressbar=foot]{metropolis}
+
+% set input encoding to utf8
+\usepackage[utf8]{inputenc}
+\usepackage{pifont}
+\usepackage{newunicodechar}
+\newunicodechar{✓}{\ding{51}}
+\newunicodechar{✗}{\ding{55}}
+
+% Palatino is a nice font
+\usepackage{palatino}
+\usepackage{relsize}
+% mathpazo provides good math support if you use Palatino
+\usepackage{mathpazo}
+\newcommand{\true}{\text{\smaller{\textsc{true}}}}
+\newcommand{\inv}{\text{\smaller{\textsc{inv}}}}
+
+% basic package for including external graphics
+\usepackage{graphicx}
+\usepackage{xspace}
+
+% resize verbatim tables
+\usepackage{adjustbox}
+
+\usepackage{tabularx} % better tables
+    \setlength{\extrarowheight}{3pt} % increase table row height
+\newcommand{\tableheadline}[1]{\multicolumn{1}{c}{\spacedlowsmallcaps{#1}}}
+\newcommand{\myfloatalign}{\centering} % to be used with each float for alignment
+\usepackage{colortbl}
+
+\usepackage{booktabs}
+\usepackage{ stmaryrd }
+
+% for pictures in TeX
+\usepackage[
+    group-digits=integer, group-minimum-digits=4, % group digits by thousands
+    free-standing-units, unit-optional-argument, % easier input of numbers with units
+    binary-units=true,%binary units
+    ]{siunitx}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+    compat=1.9,
+    log ticks with fixed point, % no scientific notation in plots
+    table/col sep=tab, % only tabs are column separators
+    unbounded coords=jump, % better have skips in a plot than appear to be interpolating
+    filter discard warning=false, % Don't complain about empty cells
+    }
+\usepgfplotslibrary{colorbrewer}
+\SendSettingsToPgf % use siunitx formatting settings in PGF, too
+
+\usepackage{changepage}
+% for code with syntax highlighting
+\usepackage{listings}
+% a basic formatting style for C programs
+\definecolor{javared}{rgb}{0.6,0,0} % for strings
+\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
+\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
+\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
+\lstdefinestyle{JAVA}{
+    basicstyle=\ttfamily,
+    keywordstyle=\color{javapurple}\bfseries,
+    stringstyle=\color{javared},
+    commentstyle=\color{javagreen},
+    morecomment=[s][\color{javadocblue}]{/**}{*/},
+    numberblanklines=false,
+    flexiblecolumns=true,
+    lineskip=1pt,
+    numbers=left,
+    numberstyle=\tiny,
+    numberfirstline=true,
+    firstnumber=1,
+}
+
+\lstdefinestyle{C}{
+    basicstyle=\ttfamily,
+    keywordstyle=\color{javapurple}\bfseries,
+    stringstyle=\color{javared},
+    commentstyle=\color{javagreen},
+    morecomment=[s][\color{javadocblue}]{/**}{*/},
+    numberblanklines=false,
+    flexiblecolumns=true,
+    lineskip=1pt,
+    numbers=left,
+    numberstyle=\tiny,
+    numberfirstline=true,
+    firstnumber=1,
+}
+
+% use our new style by default
+\lstset{style=C}
+
+\title{Augmenting Predicate Analysis\\ With Auxiliary Invariants}
+\date{\today}
+\author{Thomas Stieglmaier}
+\institute{University of Passau}
+
+\definecolor{darkbrown}{rgb}{0.4, 0.26, 0.13}
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
+
+\newcommand{\backupbegin}{
+   \newcounter{framenumberappendix}
+   \setcounter{framenumberappendix}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \addtocounter{framenumberappendix}{-\value{framenumber}}
+   \addtocounter{framenumber}{\value{framenumberappendix}} 
+}
+
+\begin{document}
+\maketitle
+\section{Motivation --- Predicate Analysis}
+\begin{frame}{Motivation}
+      Predicate Analysis\\[1ex]
+  \begin{columns}[T]
+    \begin{column}{.5\textwidth}
+      \begin{itemize}
+	\item SMT-based
+	\item Abstraction of program, computed from a set of predicates $\pi$
+	\item CEGAR for refining $\pi$
+	\item Craig interpolation for discovering precision increments
+      \end{itemize}
+    \end{column}
+  \pause
+    \begin{column}{0.5\textwidth}
+ \begin{itemize}
+    \item precision $\pi$
+    \item path formula $\phi$
+    \item abstraction formula $\psi$
+ \end{itemize}
+  Abstraction computation
+  \begin{itemize}
+    \item $\psi' = (\phi \land \psi)^\pi$
+    \item $\phi = \true$
+  \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Motivation --- Invariants}
+        Generating Invariants\\[1ex]
+      \begin{itemize}
+        \item Several tools available: \textsc{InvGen}, \textsc{Daikon}
+	\item Often not SMT-based
+      \end{itemize}
+	\pause
+	Use invariants in other analyses
+      \begin{itemize}
+	\item Add new (helpful) information to a predicate analysis
+	\item Speed up the analysis
+	\begin{itemize}
+	\item less refinements
+	\item less dependent on interpolants
+	\end{itemize}
+      \end{itemize}
+\end{frame}
+
+\section{Theory}
+\begin{frame}{\mbox{Predicate Analysis --- Adding Invariants}}
+\centering
+\bfseries\selectfont
+\Huge
+\only<1>{
+  $\psi' = (\phi \land \psi \land \textcolor{darkbrown}{\inv})^{\pi}$
+  }
+  \only<2>{
+  $\psi' = (\phi \land \psi)^{\pi \cup \{\textcolor{red}{\inv}\}}$
+  }
+  \only<3>{
+  $\psi' = (\phi \land \psi)^{\pi} \land \textcolor{darkgreen}{\inv}$
+  }
+  \only<4>{
+  \huge
+  $\psi' = (\phi \land \psi \land \textcolor{darkbrown}{\inv})^{\pi \cup \{\textcolor{red}{\inv}\}} \land \textcolor{darkgreen}{\inv}$
+  }
+\end{frame}
+
+\begin{frame}{Predicate Analysis --- Example}
+\begin{columns}
+ \begin{column}{.6\textwidth}
+   \begin{figure}
+ \includegraphics[width=\textwidth]{../../graphics/inv_usage_example_no_background}
+\end{figure}
+ \end{column}
+ \begin{column}{.5\textwidth}
+ Location \textcircled{\tiny 2}
+ \begin{itemize}
+  \item Abstraction location
+  \item $\pi = \{i < 10\}$
+  \item invariant $i = 2$
+ \end{itemize}
+
+
+ \end{column}
+\end{columns}
+
+
+\end{frame}
+
+\begin{frame}{Predicate Analysis --- Example}
+
+ \begin{table}
+  \centering
+  \begin{adjustbox}{max width=\textwidth}
+   \begin{tabular}{l r l l}
+  Strategy & \multicolumn{2}{c}{New Abstract State} & Possible Transitions\\
+  \midrule
+  No Inv& $(i < 10$,& \true{}$)$ & $2 \rightarrow 3$, $2 \rightarrow 4$\\
+  Prec & $(\textcolor{red}{i = 2} \land i < 10$,& \true{}$)$ & $2 \rightarrow 3$\\
+  PF & $(i < 10$,& $\textcolor{darkbrown}{i = 2})$ & $2 \rightarrow 3$\\
+  AF & $(\textcolor{darkgreen}{i = 2} \land i < 10$,& \true{}$)$ & $2 \rightarrow 3$\\
+  Prec + PF & $(\textcolor{red}{i = 2} \land i < 10$,& $\textcolor{darkbrown}{i = 2})$ & $2 \rightarrow 3$\\
+  Prec + AF & $(\textcolor{red}{i = 2} \land \textcolor{darkgreen}{i = 2} \land i < 10$,& \true{}$)$ & $2 \rightarrow 3$\\
+  PF + AF & $(\textcolor{darkgreen}{i = 2} \land i < 10$,& $\textcolor{darkbrown}{i = 2})$ & $2 \rightarrow 3$\\
+  Prec + PF + AF & $(\textcolor{red}{i = 2} \land \textcolor{darkgreen}{i = 2} \land i < 10$,& $\textcolor{darkbrown}{i = 2})$ & $2 \rightarrow 3$\\
+
+ \end{tabular}
+ \end{adjustbox}
+ \end{table}
+\end{frame}
+
+\begin{frame}{Auxiliary Invariants}
+ \begin{itemize}
+  \item fast computation
+  \item high success rate
+  \item useful invariants
+  \pause
+  \item[$\rightarrow$] no negative impact on the main analysis
+ \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Auxiliary Invariants --- Lightweight Heuristics}
+ PredicateCPA specific
+ \begin{itemize}
+  \item Inductive weakening of path formulas
+  \item Checking conjuncts of path formulas on invariance
+  \item Checking interpolants on invariance
+ \end{itemize}
+ \pause
+Applicable to other analyses
+\begin{itemize}
+ \item Path invariants
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Auxiliary Invariants --- Sequential Analyses}
+ Compute invariants from reached sets of earlier analyses\\[2ex]
+
+\begin{adjustwidth}{-3.5em}{-3.5em}
+\begin{figure}
+ \centering
+  \includegraphics[width=1.20\textwidth]{../../graphics/sequential_invgen}
+\end{figure}
+
+\end{adjustwidth}
+\end{frame}
+
+\begin{frame}{Auxiliary Invariants --- Parallel Analyses}
+ \begin{itemize}
+  \item $k$-induction uses concurrently running invariant generation
+  \begin{itemize}
+  \item[$\lightning$] not usable for other concurrent analyses
+  \end{itemize}
+  \item[$\rightarrow$] new {\smaller{\textsc{CPAchecker}}} feature
+  \item[]
+  \item Algorithm for executing several analyses in parallel
+  \item Communication between analyses via reached sets
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{Handling Invariants in the PredicateCPA}
+ \begin{itemize}
+  \item One manager class
+  \begin{itemize}
+  \item Exposes general methods for retrieving and generating invariants
+  \item Hides exact configuration
+  \item Lazy computation of invariants during refinement
+  \item Mixing generation and usage strategies possible
+  \end{itemize}
+  \pause
+  \item Two users
+  \begin{itemize}
+   \item Refinement (precision increment)
+   \item PrecisionAdjustment (path -and abstraction formula)
+  \end{itemize}
+ \end{itemize}
+\end{frame}
+
+\section{Evaluation}
+
+\begin{frame}{Evaluation --- Environment}
+ \begin{itemize}
+  \item \SI{2.6}{\giga\hertz} Octa Core CPUs (Intel E5-2650 v2)
+  \item \SI{8}{\giga\byte} memory
+  \item \SI{300}{\second} or \SI{600}{\second} CPU time
+  \item \emph{trunk} r23084
+  \item Measured with {\smaller \textsc{BenchExec}}
+  \item[]
+  \item 3488 verification tasks taken from SV-COMP'16
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluation --- Heuristics}
+ \begin{itemize}
+  \item Inductive weakening and checking conjuncts of path formulas failed
+  \item Checking interpolants on invariance is very slow due to prefix generation
+  \item Path invariants are too slow overall, but good on tasks in the loops category
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluation --- Path Invariants}
+\begin{itemize}
+\item Two configurations:
+\begin{itemize}
+ \item Predicate Analysis + Path Invariants with InvariantsCPA
+ \item Predicate Analysis + Path Invariants with PolicyCPA
+ \end{itemize}
+ %\item[]
+ %\item about \SI{4}{\percent} less tasks analyzed correctly overall
+ %\item about \SI{40}{\percent} more time consumption for equally and correctly analyzed tasks
+ %item about \SI{40}{\percent} successful invariant generation tries
+ %item Path Invariants with PolicyCPA are slightly better
+\end{itemize}
+\begin{adjustwidth}{-3.5em}{-3.5em}
+\begin{figure}
+ \centering
+ \includegraphics[width=1.15\textwidth]{pathInv_diagram.png}
+ \end{figure}
+ \end{adjustwidth}
+\end{frame}
+
+\begin{frame}[fragile]{Evaluation --- Path Invariants}
+ \begin{lstlisting}[language=C, frame=single]
+ int main() {
+    int i;
+    for (i = 0; i < 1000000; i++) ;
+    assert(i == 1000000);
+    return 0;
+}
+\end{lstlisting}
+\begin{itemize}
+ \item[$\textcolor{red}{\lightning}$] Interpolation unrolls the loop
+ \item[\textcolor{darkgreen}{✓}] found invariant: \texttt{i = 1000000} for location of \texttt{assert} call
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluation --- Parallel Analyses}
+ \begin{itemize}
+  \item Combination of:
+  \begin{itemize}
+  \item An analysis with the PredicateCPA, and
+  \item An analysis with the InvariantsCPA (continuously-refined)
+ \end{itemize}
+ \item \SI{600}{\second} CPU time (\SI{300}{\second} per analysis)
+ \item 7 configurations:
+ \textbf{abs}, \textbf{prec}, \textbf{path}, \textbf{abs-path}, ...
+ \item[]
+ \item 3 baselines
+ \begin{itemize}
+ \item \SI{300}{\second} and \SI{600}{\second} predicate analyses\\
+ \textbf{base300}, \textbf{base600}
+ \item \SI{600}{\second} parallel analysis without invariant generation\\
+ \textbf{basePar}
+ \end{itemize}
+ \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Evaluation --- Parallel Analyses}
+ \begin{figure}
+  \centering
+\begin{small}
+    \begin{tikzpicture}
+      \begin{semilogyaxis}[
+	  % Which column to be taken from each file
+	  /pgfplots/table/y index=3,
+	  /pgfplots/table/header=false,
+	  % axis labels
+	  xlabel=n-th fastest correct result,
+	  ylabel=CPU time (\second),
+	  % axis ranges
+	  xmin= 0,
+	  xmax=2150,
+	  ymin=2,
+	  ymax=650,
+	  xtick distance=500,
+	  width=\textwidth,
+	  height=\textheight,
+	  mark repeat=200,
+	  cycle list name=exotic,
+	  % legend
+	  legend entries={base600, base300, basePar, async-abs},
+	  every axis legend/.append style={at={(0,1)}, anchor=north west, outer xsep=5pt, outer ysep=5pt,},
+	  ]
+	  \addplot+[mark phase = 50] table {../../resources/quantile_base_long.csv};
+	  \addplot+[mark phase = 120] table {../../resources/quantile_base_short.csv};
+	  \addplot+[mark phase = 190] table {../../resources/quantile_base_parallel.csv};
+	  \addplot+[mark phase = 260] table {../../resources/quantile_parallel_abs.csv};
+      \end{semilogyaxis}
+    \end{tikzpicture}
+    \end{small}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Evaluation --- Parallel Analyses}
+ \begin{itemize}
+  \item all baselines are strictly worse than configurations with invariants
+  \item \textbf{async-abs} is the best configuration
+  \begin{itemize}
+  \item \SI{4}{\percent} better than \textbf{base600}
+  \item \SI{8}{\percent} better than \textbf{base300}
+  \item \SI{3}{\percent} better than \textbf{basePar}
+  \item[$\rightarrow$] wall time is comparable to \textbf{base300}
+  \end{itemize}
+  
+ \item \textbf{async-prec} is slow
+ \item \textbf{async-prec-path} almost as good as \textbf{async-abs}
+ \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Evaluation --- Sequential Analyses}
+  \begin{itemize}
+  \item Combination of:
+  \begin{itemize}
+  \item bounded predicate analysis (\SI{100}{\second})
+  \item unbounded predicate analysis without refinement (\SI{100}{\second})
+  \item predicate analysis using invariants (\SI{300}{\second})
+ \end{itemize}
+ \item 7 configurations (invariants):
+ \textbf{abs}, \textbf{prec}, \textbf{path}, \textbf{abs-path}, ...
+ \item 1 configuration (only precision): \textbf{restart2}
+ \item[]
+ \item 2 baselines, \SI{300}{\second} and \SI{600}{\second} predicate analyses\\
+ \textbf{base300}, \textbf{base600}
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluation --- Sequential Analyses}
+\begin{adjustwidth}{-3.5em}{-3.5em}
+\begin{figure}
+ \centering
+ \includegraphics[width=1.15\textwidth]{restart_diagram.png}
+ \end{figure}
+ \end{adjustwidth}
+\end{frame}
+
+\begin{frame}{Conclusion \& Outlook}
+  \begin{itemize}
+    \item Heuristics for invariant generation need more time than expected
+    \item More intelligent heuristics needed:
+    \begin{itemize}
+    \item When should invariants be generated
+    \item Filtering of found invariants
+    \end{itemize}
+    \pause
+    \item[]
+    \item[\textcolor{darkgreen}{✓}] Combination of analyses increases performance
+    \item[\textcolor{darkgreen}{✓}] Performance is even better if the analyses communicate
+    \item[$\rightarrow$] Aim: Make communication easier usable
+  \end{itemize}
+\end{frame}
+
+\appendix
+\backupbegin
+\begin{frame}{Path Invariants --- Table (1)}
+ \input{../tableContents/pathinvariants_overall_results}
+\end{frame}
+
+\begin{frame}{Path Invariants --- Table (2)}
+\begin{table}
+ \caption{A selection of tasks and their results with path invariants}
+\begin{adjustbox}{max width=\textwidth}
+  \begin{tabular}{lll}
+  \toprule
+  \textbf{file name} & \textbf{path-inv} & \textbf{path-policy} \\
+  \cmidrule(lr){1-1}\cmidrule(lr){2-2}\cmidrule(lr){3-3}
+loop-acceleration/array\_true-unreach-call3.i & ✓ & ✗ \\
+loop-acceleration/functions\_true-unreach-call1.i & ✗ & ✓ \\
+loop-acceleration/nested\_true-unreach-call1.i & ✓ & ✗  \\
+loop-acceleration/simple\_true-unreach-call1.i & ✗ & ✓ \\
+\rowcolor{darkgreen!50} loop-new/count\_by\_1\_true-unreach-call.i & ✓ & ✗ \\
+loop-new/count\_by\_1\_variant\_true-unreach-call.i & ✓ & ✗ \\
+loop-new/count\_by\_nondet\_true-unreach-call.i & ✗ & ✓ \\
+\bottomrule
+ \end{tabular}
+ \end{adjustbox}
+
+\end{table}
+\end{frame}
+
+\begin{frame}{Parallel Analyses --- Table}
+ \input{../tableContents/parallel_results}
+\end{frame}
+
+\begin{frame}{Sequential Analyses --- Table}
+ \input{../tableContents/sequential_results}
+\end{frame}
+\backupend
+\end{document}

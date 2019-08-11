@@ -1,0 +1,7 @@
+(assert 
+  (not 
+    (= |main::list@3| 
+      (_ bv0 32)
+    )
+  )
+)

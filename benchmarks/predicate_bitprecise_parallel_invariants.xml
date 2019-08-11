@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<!DOCTYPE benchmark PUBLIC "+//IDN sosy-lab.org//DTD BenchExec benchmark 1.0//EN" "http://www.sosy-lab.org/benchexec/benchmark-1.0.dtd">
+<benchmark tool="cpachecker" timelimit="600 s" hardtimelimit="650 s" memlimit="8 GB" cpuCores="2">
+  <option name="-noout"/>
+  <option name="-heap">6000M</option>
+  <option name="-setprop">solver.solver=MATHSAT5</option>
+  <option name="-setprop">cpa.predicate.refinement.performInitialStaticRefinement=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantFields=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantVariables=false</option>
+
+  <propertyfile>${inputfile_path}/ALL.prp</propertyfile>
+
+  <tasks name="Other_false">
+    <includesfile>benchmarkOther_false.set</includesfile>
+  </tasks>
+    <tasks name="Other_true">
+    <includesfile>benchmarkOther_true.set</includesfile>
+  </tasks>
+  <tasks name="x64_false">
+    <includesfile>benchmark64_false.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+    <tasks name="x64_true">
+    <includesfile>benchmark64_true.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+  <tasks name="Loops_false">
+    <includesfile>benchmarkLoops_false.set</includesfile>
+  </tasks>
+    <tasks name="Loops_true">
+    <includesfile>benchmarkLoops_true.set</includesfile>
+  </tasks>
+  
+  <!-- asynchronous invariant generation, invariants can be used everywhere, continously refined -->
+  <rundefinition name="async-invariants-path">
+    <option name="-pred-Invgen-parallel-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=true</option>
+  </rundefinition>
+  <rundefinition name="async-invariants-prec-path">
+    <option name="-pred-Invgen-parallel-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=true</option>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+  </rundefinition>
+  <rundefinition name="async-invariants-abs">
+    <option name="-pred-Invgen-parallel-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=true</option>
+  </rundefinition>
+  <rundefinition name="async-invariants-prec">
+    <option name="-pred-Invgen-parallel-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+  </rundefinition>
+  <rundefinition name="async-invariants-prec-abs">
+    <option name="-pred-Invgen-parallel-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=true</option>
+  </rundefinition>
+  <rundefinition name="async-invariants-prec-abs-path">
+    <option name="-pred-Invgen-parallel-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=true</option>
+    <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=true</option>
+  </rundefinition>
+   <rundefinition name="async-invariants-abs-path">
+    <option name="-pred-Invgen-parallel-bitprecise"/>
+    <option name="-setprop">cpa.predicate.invariants.appendToPathFormula=true</option>
+    <option name="-setprop">cpa.predicate.invariants.appendToAbstractionFormula=true</option>
+  </rundefinition>
+
+  <!--
+  <columns>
+    <column title="total">time for CPAchecker</column>
+    <column title="reached">reached set</column>
+    <column title="ref">Number of refinements</column>
+    <column title="invGen">Total invariant generation tries</column>
+    <column title="invSucc">Successful invariant generation tries</column>
+    <column title="invTime">Total time for invariant generation</column>
+  </columns>
+  -->
+</benchmark>

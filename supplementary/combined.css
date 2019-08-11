@@ -1,0 +1,63 @@
+div, body, * { margin: 0; padding: 0; }
+
+body {
+    font-family: sans-serif;
+    font-size:100.01%;
+    text-align: center;
+    background-color: white;
+    max-width: 55em;
+    margin: 0px auto;
+    margin-bottom: 2em;
+}
+
+p, ul { line-height: 140%; }
+
+p { margin-bottom:0.5em; text-align:justify;}
+
+blockquote { margin: 0 0 0 4ex; }
+
+small { font-size: 70%; }
+
+h1 { text-align:center; font-size:3em; margin-bottom:0.5em; font-weight:normal;  }
+h2 { text-align:center; font-size:1.5em; margin-bottom:0.5em; margin-top:2em; color:#e58900; }
+h3 { text-align:center; font-size:1.2em; margin-top:2em; color:gray; margin-bottom: 1ex; }
+
+a:link, a:visited { color:#000000; }
+a:hover, a:active { color:#e58900; }
+a img, a:hover img { border: none; }
+
+code { font-size: 110%; background-color:#fefefe; padding:3px;}
+
+#content { font-size: 90%; text-align: left; margin: 6ex auto 0 auto; color:#000000; }
+#content ol { list-style-position: outside; margin: 1ex 0; padding: 0 0 0 4ex; }
+#content ul { list-style-position: outside; margin: 1ex 0; padding: 0 0 0 4ex; }
+#content ul.blank { list-style: none outside none; padding: 0px; }
+#content li { margin-bottom: 10px; }
+#content td { padding: 1ex; vertical-align: top; }
+#content tr.sep { border-top: 1px #e58900 solid; }
+#content table { border-collapse: collapse; }
+
+.paper { background-color:white; padding:4em; }
+.authors { text-align:center; }
+.authors a { margin:0 0 0 0.2em; }
+.heading { margin-bottom:3em; text-align:center; }
+.abstract { font-style:italic; }
+.crossref { text-align:center; margin:1em auto 1em auto; width:75%; }
+.slides { overflow: auto; }
+.slide { width:45%; float:left; margin:0.5em 0.5em 0.5em 0.5em; }
+.slide img { border: 1px dotted gray; }
+.plot {width:75%; margin-left:12.5%; padding-top: 30px; padding-bottom:15px;}
+.prop {display:inline-block; background-color:#fefefe;, padding:3px; text-align:left;}
+table.describe, .describe tr, .describe th, .describe td { border: none; }
+pre, .tech { font-family:monospace; font-size:9pt;  }
+.howto { background-color:#F1F1F1; padding:1em; margin-bottom:1em; text-align:justify;}
+.abstract {text-align:justify;}
+
+table.booktabs { caption-side:top; border-collapse:collapse; margin:2em 0 2em 0; width:100%; }
+table.booktabs, table.booktabs caption { background-color:#F1F1F1; }
+table.booktabs caption { font-size: 1.5em; color:gray; padding:0.2em; }
+table.booktabs thead { border-bottom:1px solid black; }
+table.booktabs tbody { border-bottom:2px solid black; }
+table.booktabs td, table.booktabs th { padding:0.2em 1em 0.2em 1em !important; }
+
+emph { color:#FFAA00; font-weight:bold; }

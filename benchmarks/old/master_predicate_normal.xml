@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<!DOCTYPE benchmark PUBLIC "+//IDN sosy-lab.org//DTD BenchExec benchmark 1.0//EN" "http://www.sosy-lab.org/benchexec/benchmark-1.0.dtd">
+<benchmark tool="cpachecker" timelimit="300 s" hardtimelimit="400 s" memlimit="8 GB" cpuCores="2">
+  <option name="-noout"/>
+  <option name="-heap">6000M</option>
+  <option name="-setprop">solver.solver=MATHSAT5</option>
+
+  <propertyfile>${sourcefile_path}/ALL.prp</propertyfile>
+
+  <tasks name="ArraysReach">
+    <includesfile>../programs/benchmarks/ArraysReach.set</includesfile>
+  </tasks>
+  <tasks name="HeapReach">
+    <includesfile>../programs/benchmarks/HeapReach.set</includesfile>
+  </tasks>
+  <tasks name="Floats">
+    <includesfile>../programs/benchmarks/Floats.set</includesfile>
+<!--    <option name="-setprop">cpa.predicate.handlePointerAliasing=false</option>-->
+  </tasks>
+  <tasks name="ControlFlow">
+    <includesfile>../programs/benchmarks/ControlFlow.set</includesfile>
+  </tasks>
+  <tasks name="Simple">
+    <includesfile>../programs/benchmarks/Simple.set</includesfile>
+<!--    <option name="-setprop">cpa.predicate.handlePointerAliasing=false</option>-->
+  </tasks>
+  <tasks name="ECA">
+    <includesfile>../programs/benchmarks/ECA.set</includesfile>
+  </tasks>
+  <tasks name="Loops">
+    <includesfile>../programs/benchmarks/Loops.set</includesfile>
+  </tasks>
+  <tasks name="ProductLines">
+    <includesfile>../programs/benchmarks/ProductLines.set</includesfile>
+  </tasks>
+  <tasks name="Sequentialized">
+    <includesfile>../programs/benchmarks/Sequentialized.set</includesfile>
+  </tasks>
+  <tasks name="DeviceDriversLinux64">
+    <includesfile>../programs/benchmarks/DeviceDriversLinux64.set</includesfile>
+<!--    <option name="-setprop">cpa.predicate.handlePointerAliasing=false</option>-->
+    <option name="-64"/>
+  </tasks>
+  <tasks name="BusyBox">
+    <includesfile>../programs/benchmarks/BusyBox.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+
+
+  <rundefinition name="pred">
+    <option name="-predicateAnalysis"/>
+  </rundefinition>
+  <rundefinition name="predAbs-Inv-Weakening">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=ABSTRACTION_FORMULA</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=PF_INDUCTIVE_WEAKENING</option>
+    <option name="-setprop">cpa.slicing.selectorAnnotationMode=CONJUNCTIONS</option>
+  </rundefinition>
+  <rundefinition name="predAbs-Inv-CNF_KIND">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=ABSTRACTION_FORMULA</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=PF_CNF_KIND</option>
+  </rundefinition>
+  <rundefinition name="predAbs-Inv-RF_interpol">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=ABSTRACTION_FORMULA</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+  </rundefinition>
+    <rundefinition name="predAbs-Inv-async-slicing">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=ABSTRACTION_FORMULA</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=ASYNC_CPA</option>
+    <option name="-setprop">invariantGeneration.config=config/formula-slicing.properties</option>
+    <option name="-setprop">cfa.findLiveVariables=true</option>
+    <option name="-setprop">invariantGeneration.async=true</option>
+  </rundefinition>
+  <rundefinition name="predAbs-Inv-async-invariants">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=ABSTRACTION_FORMULA</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=ASYNC_CPA</option>
+    <option name="-setprop">invariantGeneration.config=config/invariantGeneration-no-out.properties</option>
+    <option name="-setprop">invariantGeneration.async=true</option>
+  </rundefinition>
+  <rundefinition name="predAbs-Inv-restart">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=ABSTRACTION_FORMULA</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=ASYNC_CPACHECKER</option>
+  </rundefinition>
+
+
+  <rundefinition name="predRef-Inv-Weakening">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=PF_INDUCTIVE_WEAKENING</option>
+    <option name="-setprop">cpa.slicing.selectorAnnotationMode=CONJUNCTIONS</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-CNF_KIND">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=PF_CNF_KIND</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-RF_interpol">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-RF_Invgen-inv">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INVARIANT_GENERATION</option>
+    <option name="-setprop">invariantGeneration.config=config/invariantGeneration-no-out.properties</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-RF_Invgen-policy">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INVARIANT_GENERATION</option>
+    <option name="-setprop">invariantGeneration.config=config/policy-invariants.properties</option>
+    <option name="-setprop">cfa.findLiveVariables=true</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-RF_Invgen-formula">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INVARIANT_GENERATION</option>
+    <option name="-setprop">invariantGeneration.config=config/formula-slicing.properties</option>
+    <option name="-setprop">cfa.findLiveVariables=true</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-async-slicing">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=ASYNC_CPA</option>
+    <option name="-setprop">invariantGeneration.config=config/formula-slicing.properties</option>
+    <option name="-setprop">cfa.findLiveVariables=true</option>
+    <option name="-setprop">invariantGeneration.async=true</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-async-invariants">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=ASYNC_CPA</option>
+    <option name="-setprop">invariantGeneration.config=config/invariantGeneration-no-out.properties</option>
+    <option name="-setprop">invariantGeneration.async=true</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-restart">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.usageStrategy=REFINEMENT</option>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=ASYNC_CPACHECKER</option>
+  </rundefinition>
+
+  <!--
+  <columns>
+    <column title="total">time for CPAchecker</column>
+    <column title="reached">reached set</column>
+    <column title="ref">Number of refinements</column>
+    <column title="invGen">Total invariant generation tries</column>
+    <column title="invSucc">Successful invariant generation tries</column>
+    <column title="invTime">Total time for invariant generation</column>
+  </columns>
+  -->
+</benchmark>

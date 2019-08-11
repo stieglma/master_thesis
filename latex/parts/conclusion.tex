@@ -1,0 +1,31 @@
+\chapter{Conclusion}
+In this chapter we give a summary of this thesis. We briefly explain our conceptual additions and provide an overview over the results of our evaluation.
+Lastly we conclude our thesis with an outlook on how the usage and generation of invariants can be extend and improved in the future.
+
+\section{Summary of this Thesis}
+In this work we introduced a new algorithm for concurrent execution of several analyses and based on this we added the possibility of communication via reached sets
+in \CPAchecker{}. This was then used for computing 
+invariants out of reached sets for usage with another analysis. Besides concurrent analysis we also implemented several lightweight invariant-generation approaches, either based on path formulas that 
+are transformed to a \ac{CNF}-like shape and then used to compute invariants by inductive weakening or simply checking the conjuncts for invariance, or they are based on interpolants that are checked for 
+invariance. All the lightweight approaches did not yield the expected results, neither the path formula and interpolation-based approaches, nor path invariants. All of these approaches consumed to much time and
+therefore turned out not to be as lightweight as expected.
+
+The configurations using invariants computed sequentially or concurrently are working better. The sequential configurations have a run time in
+between \SI{300}{\second} and \SI{600}{\second} thus being slower but much more precise than the baseline with \SI{300}{\second} and being 
+faster and equally precise than the baseline with \SI{600}{\second}. For parallel analyses we measured a performance improvement of about
+\SI{3}{\percent} compared to a portfolio analysis and about \SI{8}{\percent} compared to a pure predicate analysis needing a comparable wall time.
+
+The evaluation of the different invariant-usage strategies showed that our expectation was correct and conjoining invariants to the abstraction
+formula yields the best results. Adding invariants to the precision is the best option if we have formulas where we are not sure if they are
+invariant, but adding formulas to the precision also slows the analysis down.
+
+\section{Future Work}
+For the future there are several possibilities how this work can be extended. The main goal is to make the the inter-analysis communication more robust. With the current approach already small differences 
+in the formula encoding will lead to hard-to-find errors. Furthermore we did only test each invariant generation approach on its own, by combining them we may be able to use synergies between them, \eg, 
+the concurrent approaches are better in finding safety proofs whereas the sequential approaches find more bugs.
+Besides combining different approaches we could also try to make the existing approaches more intelligent, for example, such that invariants are only used if they are known to improve the analysis, and 
+ignored in other cases. This could be achieved by classifying the parts of the invariant formula such that we try to find out which parts will, for example, lead to loops being unrolled. Another approach to 
+improve invariants usage is to take, additionally to the location, the call-stack information into account. This way, invariants generated from reached sets contain less disjunctions and make the analysis more 
+precise.
+
+Overall our work is the base for future experiments with invariants in \CPAchecker{}. Its flexibility and modularity make future extensions easy. Several ways to enhance our work are described in the paragraph above.

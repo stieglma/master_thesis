@@ -1,0 +1,57 @@
+\documentclass[twoside, openright, 11pt, a4paper, footinclude=true, headinclude=true, cleardoublepage=empty, parskip=half]{scrbook}
+% together with parskip we have to manually set parindent
+\setlength{\parindent}{17pt}
+
+% Personal data and user ad-hoc commands
+\newcommand{\myTitle}{Augmenting Predicate Analysis with Auxiliary Invariants\xspace}
+\newcommand{\myName}{Thomas Stieglmaier\xspace}
+\newcommand{\myProf}{Prof. Dr. Dirk Beyer\xspace}
+\newcommand{\myOtherProf}{Prof. Dr. Sven Apel\xspace}
+\newcommand{\mySupervisor}{Matthias Dangl\xspace}
+\newcommand{\myFaculty}{Faculty of Computer Science and Mathematics\xspace}
+\newcommand{\myDepartment}{Chair of Software Systems\xspace}
+\newcommand{\myUni}{University of Passau\xspace}
+\newcommand{\myLocation}{Passau\xspace}
+\newcommand{\myTime}{\today\xspace}
+
+% all includes are handled here
+\include{sosy-lab-config}
+
+\begin{document}
+
+% language for the main part of the document
+% (change to "ngerman" for a german document)
+\selectlanguage{english}
+
+\frontmatter
+\include{titlepage}
+\include{abstract}
+\include{contents}
+
+\mainmatter
+
+\ctparttext{The following three chapters motivate the usage of invariants and provide the necessary information about
+other invariant generation and usage approaches.}
+\part{Introduction}
+\include{parts/motivation}
+\include{parts/background}
+\include{parts/related_work}
+
+\clearpage
+\ctparttext{The following two chapters give detailed information about conceptual changes and additions that had to be made, as well as a documentation of the most important features that were added to \CPAchecker{}.}
+\part{Generating and Using Auxiliary Invariants in CPAchecker}
+\include{parts/conceptual_extensions}
+\include{parts/augment_predicate_with_invariants}
+
+\clearpage
+\ctparttext{Within the next three chapters, we provide an exhaustive evaluation of different invariant generation strategies, showing their advantages and disadvantages. Furthermore, we give information about the problems we encountered. Lastly, we conclude the thesis by summarizing what we have accomplished, and giving and outlook on possible improvements for the future.}
+\part{Evaluation and Conclusion}
+\include{parts/evaluation}
+\include{parts/restrictions}
+\include{parts/conclusion}
+
+\appendix
+\bibliography{thesis}
+\include{declaration}
+
+\end{document}

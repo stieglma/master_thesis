@@ -1,0 +1,62 @@
+\subsection{Sequential Combination of Analyses}
+From using some analyses concurrently we come to sequential combinations of analyses now. While for parallel analyses the advantage is that all concurrently running analyses can communicate via
+intermediate finished reached sets with each other, the drawback is that all analyses consume CPU time at the same moment although one analysis may perhaps be able to successfully analyze the program
+all by itself. With sequential combinations of analyses we try to use fast and coarse analyses at first and if they are not able to successfully analyze the program we pass their reached set on to the
+next analysis, which can save computation time due to the already found invariants.
+
+\begin{figure}
+ \includegraphics[width=\textwidth]{../graphics/sequential_invgen}
+ \caption{Overview over the sequential combinations of analyses and their information exchange}
+ \label{fig:sequentialOverview}
+\end{figure}
+
+
+Our approach consists of two to three sequentially combined analyses. An overview can be seen in \autoref{fig:sequentialOverview}, they are explained in detail in the following paragraphs.
+\begin{enumerate}
+ \item \label{item:firstanalysis}The first analysis is always a bit-precise predicate analysis limited to a number of five loop iterations,\,\sidenote{Five loop iterations
+ were chosen as a trade off between precision and a fast analysis.} which means that all paths where more than five loop iterations are encountered are ignored in the further
+ analysis. This technique is for example also used for \ac{BMC}. The refinement of paths with possible specification is delayed until the full state space is explored. Then
+ all paths are refined at once, and we terminate the analysis. The precision increment computed by the so called global refinement\,\sidenote{This refinement strategy was
+ implemented by us especially for this invariant generation approach. The advantage is that by delaying the refinement we can explore the full state space for a given precision,
+ which would not be possible with the existing refinement strategies.} is dumped for further usage with other analyses. This analysis can only be used for finding specification
+ violations, as the loop bound prevents us from analyzing deeper parts of the state space; therefore we cannot draw conclusions about safety. This analysis is assumed to be very
+ fast, but we still limited it to \SI{100}{\second} in our evaluation, as for some programs it takes longer than expected. If the time limit is reached, no precision is dumped and
+ the next analysis is skipped, such that the additional time needed for unsuccessful tasks does not grow too much.
+ 
+ \item The second analysis is once again a bit-precise predicate analysis, but this configuration is unbounded. It uses the precision dumped by the first analysis and just explores
+ the state space. This analysis does not use any refinement, its aim is just to provide a reached set we can use later on for invariant generation. As we do not use any refinement,
+ this analysis cannot be used for finding bugs, instead it can prove safety if the precision computed by the first analysis is strong enough. This analysis is limited to \SI{100}{\second}.
+ 
+ \item The third analysis is a bit-precise predicate analysis which uses the reached set computed by the second analysis for computing invariants. The invariants can then be used
+ for adding them to the precision or for conjoining them to the path or abstraction formulas. This analysis can do both, prove safety and find bugs. In our evaluation this analysis
+ is limited to \SI{300}{\second}. Altogether we have two analyses for invariant generation and the main analysis, which uses the computed invariants afterwards.\label{item:thirdanalysis}
+\end{enumerate}
+
+As one approach to using invariants is adding them to the precision, we did also evaluate a configuration using only the analyses described in \autoref{item:firstanalysis}
+and \autoref{item:thirdanalysis}. The later analysis then uses the dumped precision directly and behaves like the baseline analyses apart from that. This has the advantage
+that no additional time for the state-space exploration of the second analysis is needed, and furthermore, there are no invariants that are changing the analysis during run
+time. This configuration will be called \textbf{restart2}.
+
+\input{tableContents/sequential_results}
+
+\autoref{table:sequential} shows the results of evaluating the sequential invariant-generation approaches. While all configurations using invariants are slower than \textbf{base300} by about \SI{40}{\percent} to 
+\SI{56}{\percent} they are strictly faster than \textbf{base600}. The speedup is about \SI{25}{\percent} for \textbf{restart2} and a little lower for the other configurations. In general, \textbf{restart2} is the best 
+configuration using invariants we have in this category: the additional time necessary for state-space exploration in the other configurations slows down the analysis too much. By looking at the 
+successfully analyzed verification tasks, we can see that \textbf{restart2} performs overall a little better than \textbf{base600}, and \textbf{base300} is the worst configuration in this regard. The 
+higher number of correctly found specification violations for \textbf{restart2} is caused by the first analysis of the sequential combination. For \num{14} fewer tasks safety was proved correctly by \textbf{restart2} compared to 
+\textbf{base600}, which is mainly caused by the fact that the predicate analysis needs more than \SI{300}{\second} to analyze them (with and without invariants). Another cause that was already 
+explained earlier is that some invariants explicitly cause some loops to be unrolled and therefore lead to timeouts where the baseline is able to analyze the task in time.
+
+That the time for the first and second analyses --- columns \textbf{Alg1} and \textbf{Alg2} --- are always approximately the same is the case because the analyses are always the same. The difference
+is only in using the invariants in the third analyses. The times for the third analyses are also only differing marginally. Surprisingly, the time consumed in the first analysis is higher than the time in 
+the subsequent analyses. To reduce this time, we could, for example, decrease the loop bounds to a value smaller than five. The average number of analyses used is therefore also equal: 2.38 means that 
+many of the analysis either need two or all three analyses for analyzing the verification task. For \textbf{restart2} the average number of used analyses is 1.97, which means that in most cases the second
+analysis is required.
+
+A closer look at the different invariant usage strategies shows the same picture as for the concurrently generated invariants evaluated in the last section. Apart from \textbf{restart2}, \textbf{seq-abs} is 
+the best configuration using invariants. It is about \SI{0.5}{\hour} (\SI{5}{\percent}) faster than \textbf{seq-prec}. \textbf{seq-path} is even faster than \textbf{seq-abs} but its results are not as good. \textbf{seq-prec-path}, which 
+should be almost equal to \textbf{seq-abs} is once again too slow and also the results are worse than the results of \textbf{seq-path} alone.
+
+Overall we can say that the combination of two analyses with different aims leads to better results in a shorter time than a single analysis does. \textbf{restart2} is clearly faster than \textbf{base600} 
+with equal performance, and a bit slower than \textbf{base300} with much more correctly analyzed verification tasks. What can also be seen is that invariants should not be generated at all costs: in some cases it makes
+sense to use weaker assumptions, for example, a dumped precision for incrementing the precision of another analysis, instead of creating invariants out of this precision with a separate analysis.

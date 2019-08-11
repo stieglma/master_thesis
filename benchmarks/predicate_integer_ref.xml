@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!DOCTYPE benchmark PUBLIC "+//IDN sosy-lab.org//DTD BenchExec benchmark 1.0//EN" "http://www.sosy-lab.org/benchexec/benchmark-1.0.dtd">
+<benchmark tool="cpachecker" timelimit="300 s" hardtimelimit="400 s" memlimit="8 GB" cpuCores="2">
+  <option name="-noout"/>
+  <option name="-heap">6000M</option>
+  <option name="-setprop">solver.solver=MATHSAT5</option>
+  <option name="-setprop">cpa.predicate.invariants.addToPrecision=true</option>
+  <option name="-setprop">cpa.predicate.refinement.performInitialStaticRefinement=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantFields=false</option>
+  <option name="-setprop">cpa.predicate.ignoreIrrelevantVariables=false</option>
+
+  <propertyfile>${inputfile_path}/ALL.prp</propertyfile>
+
+  <tasks name="Other_false">
+    <includesfile>benchmarkOther_false.set</includesfile>
+  </tasks>
+    <tasks name="Other_true">
+    <includesfile>benchmarkOther_true.set</includesfile>
+  </tasks>
+  <tasks name="x64_false">
+    <includesfile>benchmark64_false.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+    <tasks name="x64_true">
+    <includesfile>benchmark64_true.set</includesfile>
+    <option name="-64"/>
+  </tasks>
+  <tasks name="Loops_false">
+    <includesfile>benchmarkLoops_false.set</includesfile>
+  </tasks>
+    <tasks name="Loops_true">
+    <includesfile>benchmarkLoops_true.set</includesfile>
+  </tasks>
+
+  <!-- trying to create invariants with lightweight heuristics -->
+  <rundefinition name="predRef-Inv-Weakening">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=PF_INDUCTIVE_WEAKENING</option>
+    <option name="-setprop">cpa.slicing.selectorAnnotationMode=CONJUNCTIONS</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-CNF_KIND">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=PF_CNF_KIND</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-RF_interpol">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.invariants.generationStrategy=RF_INTERPOLANT_KIND</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-restart">
+    <option name="-pred-Invgen-restart"/>
+  </rundefinition>
+
+  <!-- generate local invariants out of error path which can only be used for refining the precision -->
+  <rundefinition name="predRef-Inv-RF_Invgen-inv">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.refinement.usePathInvariants=true</option>
+    <option name="-setprop">invariantGeneration.config=config/invariantGeneration-no-out.properties</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-RF_Invgen-policy">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.refinement.usePathInvariants=true</option>
+    <option name="-setprop">invariantGeneration.config=config/policy-invariants.properties</option>
+    <option name="-setprop">cfa.findLiveVariables=true</option>
+  </rundefinition>
+  <rundefinition name="predRef-Inv-RF_Invgen-formula">
+    <option name="-predicateAnalysis"/>
+    <option name="-setprop">cpa.predicate.refinement.usePathInvariants=true</option>
+    <option name="-setprop">invariantGeneration.config=config/formula-slicing.properties</option>
+    <option name="-setprop">cfa.findLiveVariables=true</option>
+  </rundefinition>
+
+  <!-- asynchronous invariant generation, invariants can be used everywhere, (perhaps) continously refined 
+  TODO check invariant generators which support being non-bitprecise, anything else is unsound
+  <rundefinition name="predAbs-Inv-async-invariants">
+    <option name="-pred-Invgen-parallel"/>
+  </rundefinition>
+  -->
+
+  <!--
+  <columns>
+    <column title="total">time for CPAchecker</column>
+    <column title="reached">reached set</column>
+    <column title="ref">Number of refinements</column>
+    <column title="invGen">Total invariant generation tries</column>
+    <column title="invSucc">Successful invariant generation tries</column>
+    <column title="invTime">Total time for invariant generation</column>
+  </columns>
+  -->
+</benchmark>

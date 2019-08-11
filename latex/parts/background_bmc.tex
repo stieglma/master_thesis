@@ -1,0 +1,114 @@
+\section{$k$-Induction with Continuously-Refined Invariants}\label{title:kind}
+\Kinduction{} is a model-checking approach which extends traditional \ac{BMC} based strategies, such that they are not only able to find bugs, but also to prove safety.
+\ac{BMC} is used in \Kinduction{} to unroll the program until a certain limit $k$ for the length of the path is reached. If an error is found the analysis is finished. If not
+we try to verify the program by induction. When this fails, we increase $k$ and start over with \ac{BMC}.
+\CPAchecker{} uses split-case \Kinduction{}\,\sidenote{Another approach is combined-case \Kinduction{}, where the base and the step case of the induction are not separated.} and therefore we focus on it for this work~\cite{Beyer:KInduction}. The following sections provide more details about the theory of \Kinduction{} and how it can be implemented in a model checker.
+
+\subsection{Bounded Model Checking}\label{title:bmc}
+\ac{BMC} is a technique for software falsification. By setting a limit $k$ to the length of the unrolling of a program, only counterexamples up to a certain length can be found. SAT or \ac{SMT} solvers can be used to check the satisfiability of unrolled paths through a program. \ac{BMC} in combination with the \PredicateCPA{} can be done by setting $\blk{}$ to do no abstraction until a certain bound is met (instead of doing an abstraction, \eg, for all loop heads). Due to the given bound this approach is not able to make statements about the safety of a program, but instead only found errors can be reported.
+
+\subsection{$k$-Induction}
+\Kinduction{} uses \ac{BMC} to check for the presence of counterexamples regarding a certain safety property $P$. If no counterexamples exists in a path unrolled
+up to a length $k$ we try to verify the program by induction.
+Consider a program with a loop: if $P$ holds for $k = 1$ this means that no violation of the property $P$ exists when unrolling exactly one iteration of the loop,
+however a counterexample in one of the following loop iterations could still exist. The safety property $P$ is given by:
+\begin{displaymath}
+P(l,f) = \neg (\exists s \in \reached: \mathtt{loc}(s) = l \land f)
+\end{displaymath}
+It depends on a location $l$ and a formula $f$.\,\sidenote{When searching for errors in the program, $l$ will be the error location and $f$ is simply \true{}.}
+The property holds as long as no state $s$ is reachable (i.e. exists in the set $\reached$)
+such that the location of $s$ (\texttt{loc}($s$)) is equal to the error location $l$.
+
+If we are able to prove that for any given iteration through the loop $P$ is not violated, and $P$ also holds in the following iteration,
+we may be able to prove safety of the analyzed program. If the inductiveness check fails, we can increase $k$ and try again. This is called
+\emph{iterative-deepening \Kinduction{}}~\cite{Beyer:KInduction}. \autoref{alg:kind} shows the iterative deepening, and the separation of
+the base and the step case. In the following paragraphs, the algorithm will be explained in more detail.
+
+%The formula for \Kinduction{} over natural numbers can be written as:
+%\begin{displaymath}
+% \left(\overset{k-1}{\underset{i=0}{\bigwedge}} P_i \land \forall n : \left(\left(\overset{k-1}{\underset{i=0}{\bigwedge}} P_{n +i}\right) \Rightarrow P_{n + k}\right)\right) \Rightarrow \forall n : P_n
+%\end{displaymath}
+
+\begin{algorithm}[ht]
+\LinesNumbered
+\SetKw{Var}{Variables}
+ \SetKwInput{Kw}{Variables}
+ \KwIn{an initial value $k_{init} \geq 1$ and an upper limit $k_{max}$ for the bound $k$,\newline
+  a function $\mathtt{inc} : \mathbb{N} \rightarrow \mathbb{N}$ with $\forall n \in \mathbb{N} : \mathtt{inc}(n) > n$ for increasing the bound $k$,\newline
+  the initial states defined by the predicate $I$,\newline
+  the transfer relation defined by the predicate $T$,\newline
+  and a safety property $P$}
+ \KwOut{\true{} if $P$ holds, \false{} otherwise}
+ \Kw{the formulas $base\_case$, $forward\_condition$ and $step\_case$,\newline
+     an invariant $Inv$, a bound $k$}
+   $k := k_{init}$\;
+   \While{$k \leq k_{max}$}{\label{line:while}
+     $base\_case := I(s_0) \land \overset{k-1}{\underset{n=0}{\bigvee}} \left(\overset{n-1}{\underset{i=0}{\bigvee}} T(s_i, s_{i+1}) \land \neg P(s_n)\right)$\;\label{line:basecase}
+     \If{$\mathtt{sat}(base\_case)$}{
+       \Return{\false{}}
+     }
+     
+     $forward\_condition := I(s_0) \land \overset{k-1}{\underset{i=0}{\bigwedge}} T(s_i, s_{i+1})$\;\label{line:forwardcondition}
+     \If{$\neg \mathtt{sat}(forward\_condition)$} {
+       \Return{\true{}}
+     }
+     
+     $step\_case_m := \overset{n+k-1}{\underset{i=m}{\bigwedge}} (P(s_i) \land T(s_i, s_{i+1})) \land \neg P(s_{n+k})$\;\label{line:stepcase1}
+     \Repeat{$Inv = \mathtt{getCurrentlyKnownInvariants}()$}{
+       $Inv := \mathtt{getCurrentlyKnownInvariants}()$\;
+       \If{$\neg \mathtt{sat}(\exists n \in \mathbb{N} : Inv(s_n) \land step\_case_n)$}{
+         \Return{\true{}}
+       }
+     }\label{line:stepcase2}
+     $k := \mathtt{inc}(k)$\;\label{line:k-inc}
+   }
+   \Return{\emph{unknown}}
+
+ \caption{Iterative-Deepening $k$-Induction~\cite{Beyer:KInduction}}
+ \label{alg:kind}
+\end{algorithm}
+
+\paragraph{Base Case}
+The base case consists of running \ac{BMC} with the current bound $k$. As described in \autoref{title:bmc}, this unrolls all paths through
+the program from initial program states denoted by the predicate $I$ up to a maximum amount of loop iterations $k$. If the formula in
+\autoref{line:basecase} of \autoref{alg:kind} is satisfiable there exists a counterexample with a length of at most $k$.
+
+\paragraph{Forward Condition}
+If the base-case formula is unsatisfiable we can check whether there exists a path with a length greater than $k$ or whether we have fully
+explored the state space of the program. This check is called $forward\_condition$ and can be found in \autoref{line:forwardcondition}.
+If the state space is fully explored, the program is safe\,\sidenote{Besides proving safety of programs we can also check predicates on inductiveness, cf. the paragraph on checking inductiveness of formulas.} and the algorithm terminates.
+
+\paragraph{Step Case}\label{title:kindstep}
+In the step case we check that after any sequence of $k$ loop iterations without
+a counterexample there is also no counterexample in the loop iteration $k+1$. This 
+check is necessary if the forward condition is not satisfiable. By leaving out the $step\_case$
+computation we would be using only \ac{BMC} with continuously increasing $k$, such that safety of
+programs could be proved when the $forward\_condition$ holds. We want the analysis to not unroll
+the complete state space, and hope that the inductive step succeeds at some point. This check will however often 
+fail when model checking of software is done, as the state space --- for which the 
+property should hold --- consists typically not solely of relevant states, but also of 
+unreachable states for which the property does not hold.
+
+For example, if we consider a loop with a loop counter which has only positive values, by using induction we try to prove the 
+property for all values, not only positive ones, and therefore the check fails (the necessary information --- the loop counter has only positive values --- may not be available
+in the induction hypothesis, which leads to the failing check).
+To overcome this problem, we can add auxiliary invariants to the satisfiability check of the 
+step case formula. This can be seen from \autoref{line:stepcase1} to \autoref{line:stepcase2}.\,\sidenote{The \emph{repeat-until}
+loop is rerun as long as more precise invariants can be found during the satisfiability computation of the step case.}
+If the conjunction of the auxiliary invariant and the step-case formula is unsatisfiable we have proved the program to
+be safe, otherwise we are not able to draw a conclusion about the safety of the program with the current value of $k$.
+By increasing $k$ (cf. \autoref{line:k-inc}) and running \autoref{alg:kind} again from \autoref{line:while}, we try
+to prove the program iteratively again.
+
+\paragraph{Auxiliary Invariants}
+Auxiliary invariants are a key feature for using \Kinduction{} for software model checking. In the scope of \autoref{alg:kind}
+they can be generated concurrently, for example with \autoref{alg:continously-refined} and then retrieved when they are needed for the
+step-case computation. This analysis may be able to prove the safety of the program itself but this is not the main purpose of
+the invariant generator.
+
+\paragraph{Checking the $k$-Inductivness of a Formula}\label{title:checkInd}
+In addition to proving safety of programs we can also check the inductiveness of a given predicate $candidate\_invariant$ for
+a program by setting $l = invariant\_location$ and $f = \neg candidate\_invariant$ for $P(l, f)$.
+With $k = 1$ we check $1$-inductiveness of the given predicate, no auxiliary invariants are needed for this.
+
+

@@ -1,0 +1,89 @@
+\chapter{Evaluation}
+In this chapter, the invariant generation and usage strategies introduced earlier will be evaluated regarding their performance. We use different kinds of programs for the evaluation and also
+several configurations to compare them to the assumed performance given in \autoref{title:combiningInv}.
+We start by describing our evaluation setup and the used benchmarks, then the used \CPAchecker{} configurations are shown, and finally we take a look at the results.
+
+\section{Evaluation Environment}
+The evaluation was performed on machines with two \SI{2.6}{\giga\hertz} Octa Core CPUs (Intel E5-2650 v2) and \SI{128}{\giga\byte} of RAM.
+The operating system is Ubuntu 16.04.1 LTS (64-bit) with a Linux 4.4.0-34 kernel. For the Java support OpenJDK 1.8 is used.
+The \CPAchecker{} revision for the evaluation is \num{23084} (\emph{trunk}).\,\sidenote{The configurations using path invariants were executed with revision 23146 (\emph{pathInvariants-fix}). This revision 
+contains a fix which only affects path invariants, and due to time limitations all benchmarks could not be rerun with this revision. The fix is also available in \emph{trunk}.} Each verification run was 
+limited to 2 physical CPU cores, which corresponds to 4 virtual CPU cores due to hyper-threading. RAM was limited to \SI{8}{\giga\byte}.
+The overall CPU time for single-analysis verification runs was limited to \SI{300}{\second},
+the concurrent or sequentially combined analyses have an overall CPU time limit of \SI{600}{\second}. This time limit may then be further divided by 
+\CPAchecker{} internally, \eg, for concurrent analyses we aim at having approximately \SI{300}{\second} for both of the analysis parts. 
+The Java heap was set to \SI{6}{\giga\byte} for all analyses. For each verification run the overall amount of CPU time\,\sidenote{This time measure refers
+to the CPU time of the whole verification run, including all threads.} and memory usage is measured. The benchmark execution and overall resource measurements are done with the BenchExec
+framework.\,\sidenote{More information on BenchExec can be found at \url{github.com/sosy-lab/benchexec}.}
+
+In all tables time consumption will be given in hours with three significant digits unless it is specified in another way.
+In tables we refer to all programs, including timeouts, unknowns and other errors as \textbf{all}, the \textbf{correct} programs are a subset of this where we talk about all correct programs of a single 
+configuration. For comparison purposes we also add information about the \textbf{equal} verification runs for a set of configurations. These numbers refer to the runs being analyzed correctly with each of 
+the configurations in the table.
+
+
+\section{Benchmark Programs}
+The benchmark programs we used are taken from the SV-Comp~2016.\,\sidenote{The SV-COMP is a competition among automated software verifiers, more information can be found at
+\url{sv-comp.sosy-lab.org/2016/}.} We excluded the categories containing verification problems regarding memory safety, floats, termination, and concurrency. They are only analyzable with specific configurations of \CPAchecker{} which we do not use, or cannot be analyzed at all at the moment. Furthermore
+we did only use the program files of the other categories that needed at least 1 refinement while using our baseline configuration introduced in the next section. Tasks that
+can be solved without refinements will never be affected by our experiments, as invariants are only generated during refinements, so they are filtered out to present a clearer picture. In the end our benchmark set contains \num{3488} verification tasks, where \num{2413} are considered being \emph{safe} and \num{1075} are considered being \emph{unsafe}.
+
+\section{Used Configurations}\label{title:configs}
+The implemented invariant generation and usage approaches allow us to evaluate many different configurations. As the \InvariantsCPA{} produces bit-precise\,\sidenote{Bit precise
+means that the formulas created with the \ac{SMT} solver do not contain unbounded integers for integer variables, but instead fixed-size bit vectors are used.} formulas only, we can also only use
+bit-precise analyses. Additionally, all analyses using invariants are based on a predicate analysis. Furthermore some features of the predicate analysis that are not working
+correctly in combinations of the \PredicateCPA{} and the \InvariantsCPA{} are switched off\,\sidenote{These features are an initial static refinement, which computes certain
+predicates out of the \ac{CFA}, and that irrelevant
+variables, identified by another part of \CPAchecker{}, are ignored.}. Due to using only bit-precise analyses we decided to use \MathSAT{} as \ac{SMT} solver which is also the
+solver used by most \CPAchecker{} configurations for the SV-COMP. Other \ac{SMT} solvers are not supporting bit vectors or they are not widely used and tested with the \PredicateCPA{}.
+
+For all configurations we have three baselines that are not using invariants, but have the same restrictions regarding unsupported features: \textbf{base300} and \textbf{base600}
+are predicate analyses with a time limit of \SI{300}{\second}, and \SI{600}{\second} respectively. \textbf{basePar} is a parallel combination of a predicate analysis and an analysis
+with the \InvariantsCPA{} --- a portfolio analysis --- where each of the analyses has approximately \SI{300}{\second} and overall they have \SI{600}{\second} together.
+
+The configurations using invariants are divided into three categories which will be evaluated separately:
+\begin{itemize}
+\item First we have the lightweight heuristics which were introduced in \autoref{title:lightweightHeuristics}, all of 
+them can be used at any given invariant usage location or at a combination of them. The configurations without specified invariant usage will be called as follows:
+\textbf{int-check} is the configuration which checks interpolants for inductivity, \textbf{weakening} is the configuration which weakens the path formula until it is an invariant, and
+\textbf{conj-check} is the configuration that transforms the path formula to a CNF and checks the conjuncts on inductivity.
+
+Additionally to these heuristics we also have path invariants. They can only be added to the precision. Path invariants can be computed with every analysis having a state implementing \texttt{FormulaReportingState}. To show that this approach is not dependent on a specific analysis, we use in one configuration the \InvariantsCPA{} and in another configuration the \PolicyCPA{}\,\sidenote{The \PolicyCPA{} is based on local policy iteration~\cite{Karpenkov:LPI}. It also uses the \PredicateCPA{} and the same formula encoding, such that we can exchange invariants easily.} as invariant generation analyses. We will refer to these configurations as \textbf{path-inv} and \textbf{path-policy}.
+
+\item Secondly we have the concurrent combination of the predicate analysis with an auxiliary-invariant generation analysis (cf. \autoref{title:sharingReached}).
+The only analysis which can be used in a continuously-refined manner is, at the moment, an analysis with the \InvariantsCPA{}.
+All computed invariants can be used at any given invariant usage location or at a combination of them.
+These configurations will be prefixed with \textbf{async}.
+
+\item Lastly we have the sequential combination of analyses where results of earlier analyses are used for invariant generation in later analyses. As for both other categories,
+invariants generated with this approach can be used at any location. The name of these configurations will be prefixed with \textbf{seq}.
+\end{itemize}
+
+The different invariant usage strategies are forming the configuration name, where \textbf{-prec} means that invariants are added to the precision, \textbf{-path} means that invariants are conjoined to the path formula, and \textbf{-abs} means that invariants are conjoined to the abstraction formula. Combinations of these can also be used.
+
+\section{Results}
+After explaining our evaluation environment, the used benchmark programs, and the set of configurations in the last sections, we take a look at the results of our evaluation process. This section is divided into three parts: first we focus on the configurations using lightweight invariants, such as path invariants or the inductive weakening of formulas; second we have a closer look at the configurations using parallel combinations of analyses for invariant generation and usage, and finally we look at the results of sequential combinations of analyses.
+
+The raw data for the tables and figures presented in this evaluation can be found at our supplementary web page at \url{sosy-lab.org/research/msc/stieglmaier/}. We do also show how our experiments can be reproduced and provide all necessary
+additional files.
+
+Overall, the usage of lightweight heuristics, as well as the sequential combination of analyses, did not achieve a noticeable performance improvement compared to the baseline.
+The additional time taken for invariant generation is missing for the main analysis and furthermore, the invariant generation was often not even successful. In contrast to these
+results, the parallel combination of the \PredicateCPA{} and the \InvariantsCPA{} lead to a huge performance boost. Compared to the single analysis baselines around \num{100}
+tasks more could be verified successfully and around \num{10} fewer false alarms were raised. More details and insights into all results are provided in the next sections.
+
+
+\input{parts/eval_heuristics}
+\input{parts/eval_parallel}
+\input{parts/eval_restart}
+
+\section{Conclusion of the Evaluation}
+Over all evaluated configurations, the concurrently computed invariants yield the best results, performing strictly better than the baseline.
+With \textbf{async-abs} being the best configuration overall. The sequential combinations of analyses were all better 
+than \textbf{base300}, but most of them were not as good as \textbf{base600}. The lightweight invariant-generation approaches did not work as expected, resulting in a worse performance than the baseline. 
+They still need more work to make them faster and the results more reliable. 
+When looking at the different usage strategies, our assumptions about their performance made in \autoref{title:combiningInv} were true, with \textbf{-abs} being the best option if a correct invariant is 
+given.
+
+
+

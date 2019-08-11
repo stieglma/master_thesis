@@ -1,0 +1,23 @@
+\chapter{Motivation}
+Predicate analysis is one of the main approaches in software verification. Its success is based on the recent improvements made to \acs{SMT} solvers which are mainly used as back-end for solving
+the formulas created during the analysis.
+
+Another huge enhancement, \acl{ABE}~\cite{Beyer:PredicateAbstraction}, was invented in 2010 and is implemented in the \CPAchecker{} framework as a part of the 
+\PredicateCPA{}. With this work we try to further enhance the \PredicateCPA{} by generating and using auxiliary invariants. The invariants should make the analysis faster and less dependent on the
+interpolation abilities of the \acs{SMT} solvers. Interpolation is nice to have and easy to use on the one hand, but inappropriate interpolants may lead to loops being unnecessarily unrolled and therefore
+to longer run times. We try to circumvent this issue by heuristics and separate analyses which generate invariants that can be used as a replacement for interpolation with \acs{SMT} solvers.
+
+One of the main contributions of this thesis is the development of an algorithm to concurrently run several analyses on the same verification task. Besides that,
+we formalize different invariant generation and usage strategies,evaluate their impact on a predicate analysis, and show their individual strengths and weaknesses.
+The concurrent execution of analyses comes hand in hand with the necessity of 
+communication between these analyses. While there was some work on passing information from an earlier running analysis to a later one~\cite{Beyer:PrecisionReuse}
+no one has extended this to passing results from one concurrently running analysis to another one. This is, however, necessary for computing invariants with one analysis,
+which should then be used in another analysis.
+
+\clearpage
+\section*{Structure of This Work}
+This work is structured into three main parts, the first part contains all background information and related work, including in-depth information about the \CPAchecker{} framework and all kinds of 
+projects using auxiliary invariants to enhance their analyses. The second part is about our additions; we explain different invariant generation heuristics, as well as how they can be used in the 
+\PredicateCPA{}. For more flexibility, we do also create a new algorithm, which allows the concurrent execution of several analyses in one verification run.
+The third and last part consists of the evaluation, giving detailed insights into our experiments and the advantages and drawbacks we found. We do also mention the restrictions
+and challenges we had, and finally conclude this thesis with a summary and an outlook on how the process of using invariants can be further extended and improved.
